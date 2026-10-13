@@ -67,7 +67,7 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 <body>
 <main id="app"></main>
 <script>
-const API='https://hallowed-husky-241.eu-west-1.convex.site',PAGE='level';
+const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
 const SUBJ={k:{n:'국어',c:'var(--k)'},e:{n:'영어',c:'var(--e)'},m:{n:'수학',c:'var(--m)'},s:{n:'과학',c:'var(--s)'}};
 const $=document.getElementById('app');
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -287,7 +287,7 @@ async function appSave(){
 }
 function appLogout(){store.set('lt_tkey','');T.key='';appLogin()}
 function shareStudent(){
- const t='오늘의 레벨 테스트 (매일 오후 3시 새 문제)\n바로 풀기: '+STUDENT_URL+'\n앱 설치(안드로이드): '+location.origin+'/student-app.html';
+ const t='오늘의 레벨 테스트 (매일 오후 3시 새 문제)\n바로 풀기: '+STUDENT_URL+'\n앱 설치(안드로이드): '+new URL('student-app.html',location.href).href;
  if(window.LTApp)LTApp.share(t);
  else if(navigator.share)navigator.share({text:t}).catch(()=>{});
  else navigator.clipboard?.writeText(t).then(()=>alert('복사했어요. 카카오톡에 붙여넣으세요.')).catch(()=>prompt('주소를 복사하세요',STUDENT_URL));
