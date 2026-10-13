@@ -1,0 +1,28 @@
+# 한 번만 쓰는 작업: 기존 Macaly 사이트의 화면 파일을 이 저장소로 가져온다.
+name: import-site
+on:
+  push:
+    paths: [".github/workflows/import-site.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pages from old site
+        run: |
+          set -e
+          mkdir -p imported
+          for f in level-test.html exam.html gosi.html student-app.html app.html favicon.svg; do
+            curl -fsSL "https://rrdknfnfvj8zclzoj3eegogf.macaly.app/$f" -o "imported/$f"
+            echo "$f $(wc -c < imported/$f)"
+          done
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add imported
+          git commit -m "chore: import pages from old Macaly site [skip ci]" || echo "nothing to commit"
+          git push
