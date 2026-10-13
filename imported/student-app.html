@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>오늘의 레벨 테스트 앱 받기</title>
+<style>
+:root{--bg:#eef3f8;--card:#fff;--ink:#1b2a49;--sub:#5b6b86;--ok:#1f9d6b;--no:#d6455d;--e:#2f6fde}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--ok:#4cd39d;--no:#ff7d92;--e:#7aa5ff}}
+:root[data-theme="dark"]{--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--ok:#4cd39d;--no:#ff7d92;--e:#7aa5ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:17px;line-height:1.6}
+main{max-width:560px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:1.7rem;margin:8px 0 4px}
+.sub{color:var(--sub);margin:0 0 18px}
+.btn{display:block;width:100%;padding:18px;border:0;border-radius:18px;background:var(--e);color:#fff;font:inherit;font-size:1.15rem;font-weight:700;text-align:center;text-decoration:none;cursor:pointer}
+.alt{display:block;text-align:center;margin-top:12px;color:var(--sub)}
+.card{background:var(--card);border-radius:18px;padding:16px 18px;margin-top:18px}
+ol{margin:0;padding-left:20px}li{margin:6px 0}
+a{color:var(--e)}
+#st{margin-top:12px;min-height:1.6em}
+#ios{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>오늘의 레벨 테스트 앱</h1>
+<p class="sub">앱을 누르면 바로 오늘 문제가 나와요. 새 문제는 매일 오후 3시에 올라와요.</p>
+<div id="android">
+<button class="btn" id="dl">앱 받기 (안드로이드)</button>
+<a class="alt" href="leveltest-student.apk" download="leveltest-student.apk">버튼이 안 되면 여기를 길게 눌러 '링크 다운로드'</a>
+<p id="st" role="status"></p>
+<div class="card">
+<b>설치 방법 (부모님과 함께 해 주세요)</b>
+<ol>
+<li>"앱 받기"를 누르면 <b>leveltest-student.apk</b>가 저장돼요. 화면 아래나 알림창에 뜬 파일을 눌러요.</li>
+<li>"출처를 알 수 없는 앱" 허용을 묻으면 <b>설정 → 허용</b>을 켜고 돌아와 <b>설치</b>를 눌러요.</li>
+<li>"Play 프로텍트" 경고가 나오면 <b>자세히 → 무시하고 설치</b>를 눌러요. 선생님이 직접 만든 앱이라 나오는 안내예요.</li>
+<li>홈 화면의 <b>오늘의 레벨 테스트</b> 아이콘을 누르고, 이름과 학년을 한 번만 입력하면 끝!</li>
+</ol>
+</div>
+</div>
+<div id="ios" class="card">
+<b>아이폰은 앱 파일을 설치할 수 없어요.</b><br>
+대신 <a href="level-test.html">이 링크</a>를 열고, 아래쪽 공유 버튼 → <b>홈 화면에 추가</b>를 누르면 앱처럼 아이콘으로 쓸 수 있어요.
+</div>
+<p class="sub" style="margin-top:18px">앱 없이 바로 풀려면: <a href="level-test.html">오늘의 레벨 테스트 열기</a></p>
+</main>
+<script>
+if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){document.getElementById('android').style.display='none';document.getElementById('ios').style.display='block'}
+const st=document.getElementById('st');
+document.getElementById('dl').onclick=async()=>{
+ st.style.color='';st.textContent='받는 중…';
+ try{
+  const r=await fetch('leveltest-student.apk',{cache:'no-store'});
+  if(!r.ok)throw 0;
+  const blob=new Blob([await r.arrayBuffer()],{type:'application/vnd.android.package-archive'});
+  const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u;a.download='leveltest-student.apk';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),1000);
+  setTimeout(()=>URL.revokeObjectURL(u),60000);
+  st.style.color='var(--ok)';st.textContent='저장했어요. 화면 아래나 알림창의 파일을 눌러 설치하세요.';
+ }catch(e){st.style.color='var(--no)';st.textContent='받지 못했어요. 아래 링크를 길게 눌러 다운로드해 보세요.'}
+};
+</script>
+</body>
+</html>

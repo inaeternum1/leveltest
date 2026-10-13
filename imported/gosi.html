@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>의료기술직 공무원 모의고사</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef5f5;--card:#fff;--ink:#14282b;--sub:#53696c;--line:#cfdede;--ac:#0f766e;--ok:#15803d;--no:#c2334d;--warn:#b45309;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a1c;--card:#16272a;--ink:#e6f2f2;--sub:#9db7b9;--line:#2a4144;--ac:#4fd1c5;--ok:#5fd68a;--no:#ff7b92;--warn:#f0b25a}}
+:root[data-theme="dark"]{--bg:#0e1a1c;--card:#16272a;--ink:#e6f2f2;--sub:#9db7b9;--line:#2a4144;--ac:#4fd1c5;--ok:#5fd68a;--no:#ff7b92;--warn:#f0b25a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:16px;line-height:1.65}
+main{max-width:660px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:1.75rem;line-height:1.3;margin:10px 0 6px;font-weight:700}
+.lead{color:var(--sub);margin:0 0 18px}
+.note{border-left:4px solid var(--warn);background:var(--card);padding:10px 14px;border-radius:8px;font-size:.88rem;color:var(--sub);margin:0 0 18px}
+button{font:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.main{width:100%;margin-top:14px;padding:15px;border:0;border-radius:12px;background:var(--ac);color:var(--bg);font-weight:700;font-size:1.05rem;cursor:pointer}
+.main:disabled{opacity:.4;cursor:default}
+.ghost{width:100%;margin-top:8px;padding:12px;border:2px solid var(--ac);background:none;color:var(--ink);border-radius:12px;cursor:pointer}
+.meta{display:flex;justify-content:space-between;color:var(--sub);font-size:.88rem}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin:6px 0 16px}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .3s}
+.q{background:var(--card);border-radius:16px;padding:20px;border:1px solid var(--line)}
+.tag{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:99px;border:1px solid var(--ac);color:var(--ac);margin-bottom:10px}
+.q h2{font-size:1.1rem;line-height:1.6;margin:0 0 4px;font-weight:600}
+.opt{display:flex;gap:10px;width:100%;text-align:left;margin-top:10px;padding:13px 14px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;cursor:pointer}
+.opt b{color:var(--ac);flex:none}
+.opt.pick{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,var(--card))}
+label{display:block;margin:6px 0 4px;color:var(--sub);font-size:.9rem}
+input,textarea{width:100%;padding:13px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit}
+textarea{word-break:break-all;font-size:.82rem}
+.score{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}
+.score .big{font-size:2.2rem;font-weight:700;color:var(--ac);line-height:1.2}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.chip{border:1px solid var(--line);border-radius:99px;padding:1px 10px;font-size:.85rem}
+.chip.low{border-color:var(--no);color:var(--no)}
+.item{border-top:1px dashed var(--line);margin-top:12px;padding-top:12px;font-size:.93rem}
+.item .ok{color:var(--ok);font-weight:700}.item .no{color:var(--no);font-weight:700}
+.sub{color:var(--sub)}
+summary{cursor:pointer;color:var(--ac);font-weight:600;margin-top:8px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const SUBJ={b:'생물',g:'공중보건',l:'의료관계법규'};
+const SET='g1';
+// [과목, 단원, 문제, 보기(첫 번째가 정답, 5지선다), 해설]
+const Q=[
+['b','세포 소기관','세포 호흡을 통해 ATP를 가장 많이 만들어 내는 세포 소기관은?',['미토콘드리아','리보솜','골지체','리소좀'],'미토콘드리아의 내막에서 산화적 인산화가 일어나 대부분의 ATP가 만들어져요. 리보솜은 단백질 합성, 골지체는 단백질 가공·분비, 리소좀은 분해를 맡아요.'],
+['b','핵산','RNA에는 있지만 DNA에는 없는 염기는?',['우라실(U)','티민(T)','아데닌(A)','구아닌(G)'],'DNA는 A, T, G, C를, RNA는 A, U, G, C를 염기로 가져요. 티민 대신 우라실이 쓰여요.'],
+['b','세포 분열','생식세포를 만들 때 염색체 수가 절반으로 줄어드는 분열은?',['감수 분열','체세포 분열','이분법','출아'],'감수 분열은 2n 세포에서 n 세포를 만드는 분열이에요(연속 2회 분열). 체세포 분열은 염색체 수가 유지돼요.'],
+['b','효소','효소의 일반적인 특성으로 옳은 것은?',['반응 후 변하지 않고 활성화 에너지를 낮춘다','반응에 소모되어 사라진다','모든 종류의 반응에 똑같이 작용한다','온도가 높을수록 활성이 계속 증가한다'],'효소는 생체 촉매로 활성화 에너지를 낮추고 반응 후 재사용돼요. 기질 특이성이 있고, 최적 온도·pH를 넘으면 변성돼 활성이 떨어져요.'],
+['b','멘델 유전','잡종 Aa끼리 교배했을 때(완전 우성) 자손의 표현형 분리비는?',['우성 : 열성 = 3 : 1','우성 : 열성 = 1 : 1','우성 : 열성 = 1 : 3','우성 : 열성 = 9 : 7'],'Aa × Aa의 자손은 유전자형이 AA : Aa : aa = 1 : 2 : 1이고, 완전 우성이면 표현형은 우성 : 열성 = 3 : 1이에요.'],
+['b','광합성','광합성에서 빛 에너지를 이용해 ATP와 NADPH를 만드는 명반응이 일어나는 곳은?',['엽록체의 틸라코이드 막','엽록체의 스트로마','미토콘드리아 기질','세포질'],'명반응은 틸라코이드 막에서, 이산화 탄소를 고정하는 암반응(캘빈 회로)은 스트로마에서 일어나요.'],
+['b','항상성','혈당량을 낮추는 호르몬은?',['인슐린','글루카곤','아드레날린','티록신'],'인슐린은 이자의 β세포에서 분비되어 혈당을 낮춰요. 글루카곤과 아드레날린은 혈당을 높여요.'],
+['b','면역','항체를 직접 만들어 분비하는 세포는?',['형질 세포(B림프구에서 분화)','대식 세포','도움 T림프구','자연 살해 세포'],'B림프구가 항원 자극을 받아 형질 세포로 분화하고, 형질 세포가 항체를 분비해요.'],
+['b','신경','뉴런에서 활동 전위가 생길 때 막 안으로 먼저 유입되어 탈분극을 일으키는 이온은?',['Na⁺','K⁺','Cl⁻','Mg²⁺'],'역치 이상의 자극이 오면 Na⁺ 통로가 열려 Na⁺가 유입되고 탈분극이 일어나요. 이어서 K⁺가 유출되며 재분극돼요.'],
+['b','원핵·진핵','원핵세포의 특징으로 옳은 것은?',['핵막이 없다','미토콘드리아가 있다','골지체가 발달해 있다','선형 염색체가 여러 개 있다'],'원핵생물(세균 등)은 핵막과 막성 세포소기관이 없고, 보통 환상 DNA를 가져요.'],
+['g','건강의 정의','WHO가 정의한 건강의 측면에 해당하지 않는 것은?',['경제적 안녕','신체적 안녕','정신적 안녕','사회적 안녕'],'WHO 헌장은 건강을 단순히 질병이 없는 상태가 아니라 신체적, 정신적, 사회적으로 완전히 안녕한 상태로 정의해요.'],
+['g','예방 수준','질병의 자연사 단계에서 1차 예방에 해당하는 것은?',['예방접종','조기 진단','암 검진','재활 치료'],'1차 예방은 질병이 생기기 전 단계(건강증진, 예방접종 등), 2차 예방은 조기 발견·치료(검진), 3차 예방은 재활과 합병증 방지예요.'],
+['g','역학 지표','일정 기간 동안 인구집단에서 새로 발생한 환자 수를 나타내는 지표는?',['발생률','유병률','치명률','사망률'],'발생률은 새로 발생한 환자를, 유병률은 특정 시점 또는 기간에 존재하는 전체 환자를 나타내요. 치명률은 환자 중 사망한 비율이에요.'],
+['g','감염병 요소','감염병이 발생하는 데 필요한 3대 요소로 알맞은 것은?',['병원체, 감염 경로(환경), 숙주','병원체, 항생제, 숙주','환경, 인구, 경제','병원체, 백신, 환경'],'감염병은 병원체, 전파 경로(환경), 감수성 있는 숙주가 모두 갖춰질 때 발생해요. 세 요소 중 하나를 차단하면 예방할 수 있어요.'],
+['g','집단면역','집단면역에 대한 설명으로 옳은 것은?',['인구집단의 상당수가 면역을 가지면 면역이 없는 사람도 간접적으로 보호된다','모든 사람이 접종해야만 효과가 생긴다','이미 병에 걸린 환자에게만 적용된다','개인이 선천적으로 가진 면역만을 뜻한다'],'집단면역은 면역을 가진 사람의 비율이 충분히 높아 병원체 전파가 줄어드는 현상이에요. 접종하지 못한 사람도 간접 효과를 받아요.'],
+['g','환경보건','다음 중 대기오염의 2차 오염물질에 해당하는 것은?',['오존(O₃)','아황산가스(SO₂)','일산화탄소(CO)','납(Pb)'],'1차 오염물질이 대기 중에서 광화학 반응 등을 거쳐 생기는 것이 2차 오염물질이에요(오존, PAN 등).'],
+['g','보건 지표','영아사망률의 정의로 알맞은 것은?',['연간 출생아 1,000명당 1세 미만 사망자 수','연앙인구 1,000명당 1세 미만 사망자 수','연간 출생아 1,000명당 28일 미만 사망자 수','연간 출생아 1,000명당 5세 미만 사망자 수'],'영아사망률은 출생아 1,000명당 생후 1년 미만 사망자 수예요. 28일 미만은 신생아사망률이에요.'],
+['g','산업보건','규폐증(진폐증의 한 종류)의 주된 원인 물질은?',['유리규산 분진','석면','납','수은'],'규폐증은 유리규산(실리카) 분진을 오래 흡입해서 생겨요. 석면은 석면폐증·중피종과 관련 있어요.'],
+['g','건강보험','「국민건강보험법」상 건강보험의 보험자는?',['국민건강보험공단','건강보험심사평가원','보건복지부','보건소'],'건강보험의 보험자는 국민건강보험공단이에요. 건강보험심사평가원은 요양급여비용의 심사와 평가를 맡아요.'],
+['g','수질','물의 BOD(생물화학적 산소요구량)가 높다는 것이 의미하는 것은?',['유기물 오염이 심하다','물이 깨끗하다','용존산소가 풍부하다','중금속이 없다'],'BOD는 미생물이 유기물을 분해하는 데 필요한 산소량이에요. 값이 높을수록 유기물 오염이 심해요.'],
+['l','의료인','「의료법」상 의료인에 해당하지 않는 사람은?',['임상병리사','조산사','한의사','치과의사'],'의료법상 의료인은 의사, 치과의사, 한의사, 조산사, 간호사예요. 임상병리사는 「의료기사 등에 관한 법률」의 의료기사예요.'],
+['l','의료기사','「의료기사 등에 관한 법률」상 의료기사 등에 해당하지 않는 것은?',['간호조무사','임상병리사','방사선사','물리치료사'],'의료기사 등에는 임상병리사, 방사선사, 물리치료사, 작업치료사, 치과기공사, 치과위생사, 보건의료정보관리사가 있어요. 간호조무사는 의료법에서 정해요.'],
+['l','진료기록 보존','「의료법 시행규칙」상 진료기록부의 보존 기간은?',['10년','5년','3년','2년'],'진료기록부는 10년, 환자 명부와 검사내용·소견 기록 등은 5년, 처방전은 2년 보존해요. 시행규칙은 개정될 수 있어 최신 조문을 확인하세요.'],
+['l','감염병 분류','「감염병의 예방 및 관리에 관한 법률」상 제1급감염병에 해당하는 것은?',['에볼라바이러스병','결핵','홍역','인플루엔자'],'에볼라바이러스병은 제1급감염병이에요. 결핵과 홍역은 제2급, 인플루엔자는 제4급이에요. 분류는 개정될 수 있으니 최신 법령을 확인하세요.'],
+['l','의료기관 개설','의원급 의료기관을 개설하려는 의사가 거쳐야 하는 절차는?',['시장·군수·구청장에게 신고','보건복지부장관의 허가','시·도지사의 허가','보건소장의 승인'],'의원급은 시장·군수·구청장에게 신고하고, 병원급 이상은 시·도지사의 허가를 받아요.'],
+['l','면허','「의료기사 등에 관한 법률」상 의료기사 등의 면허를 발급하는 사람은?',['보건복지부장관','시·도지사','질병관리청장','한국보건의료인국가시험원장'],'국가시험에 합격한 사람에게 보건복지부장관이 면허를 발급해요.'],
+['l','보건소','「지역보건법」상 보건소는 어느 단위로 설치하는가?',['시·군·구','읍·면·동','시·도','권역별 광역시'],'보건소는 시·군·구에 설치하고, 보건지소는 읍·면(동)에 설치할 수 있어요.'],
+['l','감염병 신고','의사가 제1급감염병 환자를 진단했을 때 관할 보건소장에게 하는 신고 시기는?',['즉시','24시간 이내','7일 이내','다음 달 10일까지'],'제1급감염병은 즉시, 제2급·제3급은 24시간 이내에 신고해요. 제4급은 7일 이내 표본감시 방식이에요.'],
+['l','임상병리사 업무','임상병리사의 업무로 가장 알맞은 것은?',['각종 화학적·생리학적 검사','방사선을 이용한 영상 촬영','치아 보철물 제작','물리요법을 이용한 치료'],'임상병리사는 해부병리검사 등 각종 화학적·생리학적 검사를 해요. 영상 촬영은 방사선사, 보철물은 치과기공사, 물리요법은 물리치료사 업무예요.'],
+['l','의료기관 종류','「의료법」상 종합병원의 기본 요건에서 병상 수는? (일반 요건 기준)',['100개 이상','30개 이상','50개 이상','200개 이상'],'종합병원은 100개 이상의 병상과 일정 수의 진료과목을 갖춰야 해요. 병원은 30개 이상의 병상을 갖춘 의료기관이에요.']
+];
+const LET=['①','②','③','④'];
+let cur=[],idx=0,sel=[],name='';
+const $=document.getElementById('app');
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+const dec=t=>JSON.parse(decodeURIComponent(escape(atob(t.trim()))));
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function home(){
+ $.innerHTML=`<h1>의료기술직 공무원<br>모의고사</h1>
+ <p class="lead">생물, 공중보건, 의료관계법규 3과목 총 ${Q.length}문항(4지선다)이에요. 임상병리 직렬 경력경쟁 시험 과목 구성을 참고했어요. 제출하면 바로 점수와 해설을 볼 수 있어요.</p>
+ <p class="note">학습용으로 만든 연습 문제예요. 실제 시험 기출이 아니며, 문항 수와 출제 범위는 지역 공고를 확인하세요. 법규 문항은 법령이 개정될 수 있으니 최신 조문으로 꼭 확인하세요.</p>
+ <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off">
+ <button class="main" onclick="start()">시작하기</button>`;
+}
+function start(){
+ name=document.getElementById('nm').value.trim();
+ if(!name){document.getElementById('nm').focus();return}
+ cur=Q.map(q=>({s:q[0],t:q[1],q:q[2],o:shuf(q[3].map((x,i)=>({x,i})))}));
+ idx=0;sel=[];show();
+}
+function show(){
+ const q=cur[idx],last=idx===cur.length-1;
+ $.innerHTML=`<div class="meta"><span>${SUBJ[q.s]}</span><span>${idx+1} / ${cur.length}</span></div>
+ <div class="bar"><i style="width:${idx/cur.length*100}%"></i></div>
+ <div class="q"><span class="tag">${SUBJ[q.s]} · ${q.t}</span><h2>${q.q}</h2>
+ ${q.o.map((o,i)=>`<button class="opt ${sel[idx]===o.i?'pick':''}" onclick="pick(${i})"><b>${LET[i]}</b><span>${o.x}</span></button>`).join('')}
+ <button class="main" ${sel[idx]===undefined?'disabled':''} onclick="next()">${last?'제출하기':'다음 문제'}</button></div>`;
+}
+function pick(i){sel[idx]=cur[idx].o[i].i;show()}
+function next(){if(idx<cur.length-1){idx++;show();scrollTo(0,0)}else done()}
+function card(n,a){
+ const rows=Q.map((q,i)=>({q,ok:a[i]===0,mine:q[3][a[i]]}));
+ const tot=rows.filter(r=>r.ok).length,pct=Math.round(tot/Q.length*100);
+ const per=Object.keys(SUBJ).map(k=>{const r=rows.filter(x=>x.q[0]===k),g=r.filter(x=>x.ok).length;return `<span class="chip ${g/r.length<0.4?'low':''}">${SUBJ[k]} ${g}/${r.length}</span>`}).join('');
+ const cnt={};
+ return `<div class="score"><div class="sub">${esc(n)}</div><div class="big">${tot} / ${Q.length} <span style="font-size:1rem">(${pct}%)</span></div>
+ <div class="sub">정답 ${tot}개 · 오답 ${Q.length-tot}개</div>
+ <div class="chips">${per}</div><div class="sub" style="font-size:.82rem">빨간 테두리는 정답률 40% 미만(과락 주의)인 과목이에요.</div>
+ <details><summary>문항별 정답과 해설 보기</summary>${rows.map((r,i)=>{cnt[r.q[0]]=(cnt[r.q[0]]||0)+1;return `<div class="item"><span class="${r.ok?'ok':'no'}">${r.ok?'정답':'오답'}</span> ${SUBJ[r.q[0]]} ${cnt[r.q[0]]}번 · ${r.q[1]}<br>${r.q[2]}<br><span class="sub">내 답: ${esc(r.mine??'(미응답)')}</span>${r.ok?'':`<br>정답: ${esc(r.q[3][0])}`}<br><span class="sub">${r.q[4]}</span></div>`}).join('')}</details></div>`;
+}
+function done(){
+ const a=cur.map((q,i)=>sel[i]);
+ const code=enc({n:name,d:SET,a});
+ $.innerHTML=`<h1>결과</h1>${card(name,a)}
+ <label for="cd">제출 코드 (교수자나 스터디 담당자에게 보낼 때 사용)</label>
+ <textarea id="cd" readonly rows="4">${code}</textarea>
+ <button class="main" onclick="copyCode()">제출 코드 복사</button>
+ <button class="ghost" onclick="home()">처음으로</button>
+ <p id="cm" class="lead" role="status"></p>`;
+}
+async function copyCode(){
+ const t=document.getElementById('cd');
+ try{await navigator.clipboard.writeText(t.value);document.getElementById('cm').textContent='복사했어요.'}
+ catch(e){t.select();document.getElementById('cm').textContent='코드를 길게 눌러 직접 복사해 주세요.'}
+}
+function teacher(){
+ $.innerHTML=`<h1>채점 확인</h1><p class="lead">제출 코드를 붙여넣으세요. 여러 명이면 한 줄에 하나씩 넣어요.</p>
+ <textarea id="in" rows="6" placeholder="제출 코드 붙여넣기"></textarea>
+ <button class="main" onclick="report()">채점하기</button><div id="out" style="margin-top:14px"></div>`;
+}
+function report(){
+ const lines=document.getElementById('in').value.split(/\s*\n\s*/).filter(Boolean);
+ document.getElementById('out').innerHTML=lines.map(l=>{
+  try{const d=dec(l);if(!Array.isArray(d.a)||d.a.length!==Q.length)throw 0;return card(d.n,d.a)}
+  catch(e){return `<div class="score"><b style="color:var(--no)">읽을 수 없는 코드</b><div class="sub">${esc(l.slice(0,30))}…</div></div>`}
+ }).join('')||'<p class="lead">코드를 붙여넣어 주세요.</p>';
+}
+const route=()=>location.hash==='#teacher'?teacher():home();
+addEventListener('hashchange',route);route();
+</script>
+</body>
+</html>

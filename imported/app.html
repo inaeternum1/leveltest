@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>레벨테스트 관리 앱 받기</title>
+<style>
+:root{--bg:#eef3f8;--card:#fff;--ink:#1b2a49;--sub:#5b6b86;--ok:#1f9d6b;--no:#d6455d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--ok:#4cd39d;--no:#ff7d92}}
+:root[data-theme="dark"]{--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--ok:#4cd39d;--no:#ff7d92}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:17px;line-height:1.6}
+main{max-width:560px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:1.7rem;margin:8px 0 4px}
+.sub{color:var(--sub);margin:0 0 18px}
+.btn{display:block;width:100%;padding:18px;border:0;border-radius:18px;background:var(--ink);color:var(--bg);font:inherit;font-size:1.15rem;font-weight:700;text-align:center;text-decoration:none;cursor:pointer}
+.alt{display:block;text-align:center;margin-top:12px;color:var(--sub)}
+.card{background:var(--card);border-radius:18px;padding:16px 18px;margin-top:18px}
+ol{margin:0;padding-left:20px}li{margin:6px 0}
+#st{margin-top:12px;min-height:1.6em}
+</style>
+</head>
+<body>
+<main>
+<h1>레벨테스트 관리 앱</h1>
+<p class="sub">선생님 폰(안드로이드)에 설치하는 채점·관리 앱이에요. 파일 크기 33KB.</p>
+<button class="btn" id="dl">앱 파일 받기</button>
+<a class="alt" href="leveltest-teacher.apk" download="leveltest-teacher.apk">위 버튼이 안 되면 여기를 길게 눌러 '링크 다운로드'</a>
+<p id="st" role="status"></p>
+<div class="card">
+<b>설치 방법</b>
+<ol>
+<li>"앱 파일 받기"를 누르면 <b>leveltest-teacher.apk</b>가 저장돼요. 화면 아래나 알림창에 뜨는 파일을 눌러 주세요.</li>
+<li>"출처를 알 수 없는 앱" 설치를 허용하라고 나오면 <b>설정 → 허용</b>을 켜고 뒤로 돌아와 <b>설치</b>를 누르세요.</li>
+<li>"Play 프로텍트" 경고가 나오면 <b>자세히 → 무시하고 설치</b>를 누르세요. 직접 만든 앱이라 나오는 안내예요.</li>
+<li>앱을 처음 열면 채점 주소를 한 번만 붙여넣어 주세요.</li>
+</ol>
+</div>
+<div class="card">
+<b>다운로드가 멈추면</b>
+<ol>
+<li>폰의 <b>내 파일 → 다운로드</b>에 이미 받아져 있는지 확인해 보세요.</li>
+<li>크롬이라면 주소창 오른쪽 ⋮ → <b>다운로드</b>에서 멈춘 항목을 지우고 다시 받아 보세요.</li>
+<li>와이파이 대신 모바일 데이터로(또는 그 반대로) 바꿔서 다시 해 보세요.</li>
+</ol>
+</div>
+</main>
+<script>
+const st=document.getElementById('st');
+document.getElementById('dl').onclick=async()=>{
+ st.style.color='';st.textContent='받는 중…';
+ try{
+  const r=await fetch('leveltest-teacher.apk',{cache:'no-store'});
+  if(!r.ok)throw 0;
+  const blob=new Blob([await r.arrayBuffer()],{type:'application/vnd.android.package-archive'});
+  const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u;a.download='leveltest-teacher.apk';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),1000);
+  setTimeout(()=>URL.revokeObjectURL(u),60000);
+  st.style.color='var(--ok)';st.textContent='저장했어요. 화면 아래나 알림창의 파일을 눌러 설치하세요.';
+ }catch(e){st.style.color='var(--no)';st.textContent='받지 못했어요. 아래 링크를 길게 눌러 다운로드해 보세요.'}
+};
+</script>
+</body>
+</html>

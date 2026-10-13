@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오늘의 레벨 테스트</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f8;--card:#fff;--ink:#1b2a49;--sub:#5b6b86;--line:#d3dde9;--ok:#1f9d6b;--no:#d6455d;--k:#d6455d;--e:#2f6fde;--m:#1f9d6b;--s:#d98200;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--line:#2f3d5c;--ok:#4cd39d;--no:#ff7d92;--k:#ff7d92;--e:#7aa5ff;--m:#4cd39d;--s:#ffb43d}}
+:root[data-theme="dark"]{--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--line:#2f3d5c;--ok:#4cd39d;--no:#ff7d92;--k:#ff7d92;--e:#7aa5ff;--m:#4cd39d;--s:#ffb43d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:17px;line-height:1.6}
+h1,h2,h3,.jua{font-family:'Jua','Gowun Dodum','Apple SD Gothic Neo',sans-serif;font-weight:400}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:2rem;line-height:1.25;margin:12px 0 6px}
+h2.sec{font-size:1.35rem;margin:22px 0 8px}
+.lead{color:var(--sub);margin:0 0 18px}
+button:focus-visible,select:focus-visible{outline:3px solid var(--e);outline-offset:2px}
+.all{width:100%;margin-top:14px;padding:16px;border:0;border-radius:18px;background:var(--ink);color:var(--bg);font:inherit;font-family:'Jua',sans-serif;font-size:1.2rem;cursor:pointer}
+.all:disabled{opacity:.4;cursor:default}
+.bar{height:10px;background:var(--line);border-radius:9px;overflow:hidden;margin:6px 0 18px}
+.bar i{display:block;height:100%;background:var(--c);width:0;transition:width .3s}
+.meta{display:flex;justify-content:space-between;color:var(--sub);font-size:.9rem}
+.q{background:var(--card);border-radius:20px;padding:20px;border-left:8px solid var(--c)}
+.q h2{font-size:1.25rem;line-height:1.5;margin:0 0 6px;white-space:pre-line}
+.tag{display:inline-block;font-size:.8rem;padding:2px 10px;border-radius:99px;background:var(--bg);color:var(--sub);margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;margin-top:10px;padding:14px 16px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;font:inherit;cursor:pointer}
+.opt.pick{border-color:var(--e);background:color-mix(in srgb,var(--e) 16%,var(--card))}
+.opt.dk{border-style:dashed;color:var(--sub);margin-top:16px;text-align:center}
+.opt.dk.pick{border-style:solid;border-color:var(--s);background:color-mix(in srgb,var(--s) 18%,var(--card));color:var(--ink)}
+.next{margin-top:14px;width:100%;padding:14px;border:0;border-radius:14px;background:var(--c);color:#fff;font:inherit;font-family:'Jua',sans-serif;font-size:1.15rem;cursor:pointer}
+.next:disabled{opacity:.4;cursor:default}
+.res{background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px;border-left:8px solid var(--c)}
+.res h3{margin:0;font-size:1.3rem;color:var(--c);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.weak{color:var(--sub);font-size:.92rem}
+.wrong{border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;font-size:.95rem;overflow-wrap:anywhere}
+.home{background:none;border:2px solid var(--ink);color:var(--ink);padding:12px;border-radius:14px;width:100%;font:inherit;cursor:pointer;margin-top:8px}
+label{display:block;margin:6px 0 4px;color:var(--sub)}
+input,textarea,select{width:100%;padding:14px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit}
+textarea.code{word-break:break-all;font-size:.85rem}
+.grades{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.gbtn{padding:16px 8px;border:2px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);font:inherit;font-family:'Jua',sans-serif;font-size:1.25rem;cursor:pointer}
+.gbtn.pick{border-color:var(--e);background:color-mix(in srgb,var(--e) 16%,var(--card))}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{border:2px solid var(--c);color:var(--c);border-radius:99px;padding:0 10px;font-size:.9rem}
+summary{cursor:pointer;color:var(--sub);margin-top:6px}
+.psg{background:var(--bg);padding:14px 16px;border-radius:12px;white-space:pre-line;line-height:1.85;margin:4px 0 14px;font-size:1rem}
+.fig{display:flex;justify-content:center;margin:4px 0 12px;color:var(--ink)}.fig svg{width:100%;max-width:300px;height:auto}
+.fr{display:inline-flex;align-items:center;vertical-align:middle;margin:0 .15em;line-height:1.15}
+.fr .w{margin-right:.12em}
+.fx{display:inline-flex;flex-direction:column;align-items:center;font-size:.86em}
+.fx span{padding:0 .22em}
+.fx span:first-child{border-bottom:1.5px solid currentColor;padding-bottom:.08em}
+.fx span:last-child{padding-top:.08em}
+.mine a{color:var(--e)}
+.mine li{margin:4px 0}
+.box{background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-block;border-radius:99px;padding:2px 12px;font-size:.85rem;background:var(--bg);color:var(--sub)}
+.pill.on{background:color-mix(in srgb,var(--ok) 20%,var(--card));color:var(--ok)}
+.rel{border:0;border-radius:14px;padding:14px;width:100%;font:inherit;font-family:'Jua',sans-serif;font-size:1.1rem;cursor:pointer;margin-top:10px;background:var(--ok);color:#fff}
+.rel.off{background:none;border:2px solid var(--no);color:var(--no)}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const API='https://hallowed-husky-241.eu-west-1.convex.site',PAGE='level';
+const SUBJ={k:{n:'국어',c:'var(--k)'},e:{n:'영어',c:'var(--e)'},m:{n:'수학',c:'var(--m)'},s:{n:'과학',c:'var(--s)'}};
+const $=document.getElementById('app');
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// [[4/5]] -> 세로 분수, [[2 3/7]] -> 대분수 (교과서 표기)
+const rich=t=>esc(t).replace(/\[\[(?:([^\[\]\/\s]{1,6}) )?([^\[\]\/\s]{1,6})\/([^\[\]\/\s]{1,6})\]\]/g,(m,w,a,b)=>`<span class="fr" role="math" aria-label="${w?w+'와 ':''}${b}분의 ${a}">${w?`<span class="w">${w}</span>`:''}<span class="fx" aria-hidden="true"><span>${a}</span><span>${b}</span></span></span>`);
+const fmt=d=>d?(+d.slice(5,7))+'월 '+(+d.slice(8,10))+'일':'';
+const when=at=>new Date(at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'});
+const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+const dec=t=>JSON.parse(decodeURIComponent(escape(atob(t.trim()))));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const getJSON=async u=>{const r=await fetch(u);let j=null;try{j=await r.json()}catch(e){}return{status:r.status,ok:r.ok,j}};
+const postJSON=async(u,b)=>{const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});let j=null;try{j=await r.json()}catch(e){}return{status:r.status,ok:r.ok,j}};
+
+let name='',grade=0,set=null,idx=0,sel=[],txt={};
+
+/* ---------- 학생: 시작 화면 ---------- */
+function home(){
+ name=store.get('lt_name','');grade=store.get('lt_grade',0);
+ const mine=store.get('lt_mine',[]).slice(0,10);
+ $.innerHTML=`<h1 class="jua">오늘의<br>레벨 테스트</h1>
+ <p class="lead">국어·영어·수학·과학 20문제예요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
+ <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(name)}">
+ <label>학년</label><div class="grades">${[4,5].map(g=>`<button class="gbtn ${grade===g?'pick':''}" onclick="pickGrade(${g})">${g}학년</button>`).join('')}</div>
+ <button class="all" onclick="start()">시작하기</button>
+ <p id="msg" class="lead" role="status" style="margin-top:10px"></p>
+ ${mine.length?`<h2 class="sec">내 결과</h2><div class="box mine"><ul style="margin:0;padding-left:18px">${mine.map(m=>`<li><a href="#r=${m.rid}">${fmt(m.date)} ${m.grade}학년 · ${esc(m.name)}</a></li>`).join('')}</ul><div class="weak" style="margin-top:6px">선생님이 확인하면 정답과 해설이 열려요.</div></div>`:''}`;
+}
+function pickGrade(g){grade=g;store.set('lt_grade',g);document.querySelectorAll('.gbtn').forEach(b=>b.classList.toggle('pick',b.textContent===g+'학년'))}
+async function start(){
+ const msg=document.getElementById('msg');
+ name=document.getElementById('nm').value.trim();
+ if(!name){document.getElementById('nm').focus();msg.textContent='이름을 입력해 주세요.';return}
+ if(!grade){msg.textContent='학년을 골라 주세요.';return}
+ store.set('lt_name',name);
+ msg.textContent='문제를 불러오는 중…';
+ try{
+  const r=await getJSON(`${API}/set?grade=${grade}`);
+  if(r.status===404){msg.textContent='아직 올라온 문제가 없어요. 오후 3시 이후에 다시 들어와 주세요.';return}
+  if(!r.ok)throw 0;
+  set=r.j;
+ }catch(e){msg.textContent='문제를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.';return}
+ const done=store.get('lt_mine',[]).find(m=>m.date===set.date&&m.grade===grade&&m.name===name);
+ if(done){
+  $.innerHTML=`<h1 class="jua">이미 제출했어요</h1><p class="lead">${esc(name)}님은 ${fmt(set.date)} ${grade}학년 문제를 이미 제출했어요. 새 문제는 오후 3시에 올라와요.</p>
+  <button class="all" onclick="location.hash='#r=${done.rid}'">내 결과 보기</button><button class="home" onclick="home()">처음으로</button>`;return;
+ }
+ idx=0;sel=[];txt={};show();
+}
+function ready(){const q=set.questions[idx];if(sel[idx]===-2)return true;return q.open?(txt[idx]||'').trim().length>0:sel[idx]!==undefined}
+function show(){
+ const qs=set.questions,q=qs[idx],c=SUBJ[q.s].c,last=idx===qs.length-1;
+ const dk=`<button class="opt dk ${sel[idx]===-2?'pick':''}" onclick="pick(-2)">잘 몰라요 (찍지 않고 넘기기)</button>`;
+ const body=(q.open?`<textarea id="ans" rows="4" maxlength="300" oninput="typed(this.value)" placeholder="여기에 쓰세요">${esc(txt[idx]||'')}</textarea>`
+  :q.options.map((o,i)=>`<button class="opt ${sel[idx]===i?'pick':''}" onclick="pick(${i})">${rich(o)}</button>`).join(''))+dk;
+ $.innerHTML=`<div class="meta"><span>${SUBJ[q.s].n} · ${grade}학년</span><span>${idx+1} / ${qs.length}</span></div>
+ <div class="bar" style="--c:${c}"><i style="width:${idx/qs.length*100}%"></i></div>
+ <div class="q" style="--c:${c}"><span class="tag">${esc(q.unit)}</span>${q.passage?`<div class="psg">${esc(q.passage)}</div>`:''}${q.fig?`<div class="fig">${q.fig}</div>`:''}<h2>${rich(q.q)}</h2>${body}
+ <button class="next" style="--c:${c}" ${ready()?'':'disabled'} onclick="next()">${last?'제출하기':'다음 문제'}</button>
+ ${idx>0?`<button class="home" onclick="prev()">이전 문제</button>`:''}</div>`;
+}
+function typed(v){txt[idx]=v;if(v.trim()&&sel[idx]===-2){delete sel[idx];document.querySelector('.dk').classList.remove('pick')}document.querySelector('.next').disabled=!ready()}
+function pick(i){sel[idx]=i;if(i===-2)delete txt[idx];show()}
+function prev(){if(idx>0){idx--;show();scrollTo(0,0)}}
+function next(){if(idx<set.questions.length-1){idx++;show();scrollTo(0,0)}else done()}
+function payload(){
+ const p={page:PAGE,name,grade,setId:set.date,answers:set.questions.map((q,i)=>sel[i]===-2?-2:q.open?-1:sel[i])};
+ const t={};for(const k in txt)if(sel[k]!==-2&&String(txt[k]).trim())t[k]=txt[k];
+ if(Object.keys(t).length)p.texts=JSON.stringify(t);
+ return p;
+}
+async function done(){
+ const p=payload();
+ $.innerHTML=`<h1 class="jua">제출하는 중…</h1><p class="lead">잠시만 기다려 주세요.</p>`;scrollTo(0,0);
+ try{
+  const r=await postJSON(API+'/submit',p);
+  if(!r.ok||!r.j||!r.j.rid)throw 0;
+  const mine=store.get('lt_mine',[]);mine.unshift({rid:r.j.rid,date:p.setId,grade,name,at:Date.now()});store.set('lt_mine',mine.slice(0,30));
+  $.innerHTML=`<h1 class="jua">제출 완료!</h1><p class="lead">${esc(name)}님, 수고했어요. 선생님이 확인(OK)하면 아래 버튼에서 점수와 정답, 해설을 볼 수 있어요.</p>
+  <button class="all" onclick="location.hash='#r=${r.j.rid}'">내 결과 보기</button><button class="home" onclick="location.hash='';home()">처음으로</button>`;
+ }catch(e){backup(p)}
+}
+function backup(p){
+ $.innerHTML=`<h1 class="jua">전송이 안 됐어요</h1>
+ <p class="lead">인터넷 연결을 확인하고 다시 보내기를 눌러 보세요. 계속 안 되면 아래 제출 코드를 복사해서 선생님께 카카오톡으로 보내 주세요.</p>
+ <button class="all" onclick="done()">다시 보내기</button>
+ <textarea id="cd" class="code" readonly rows="5" style="margin-top:14px">${enc(p)}</textarea>
+ <button class="home" onclick="copyCode()">제출 코드 복사</button>
+ <p id="cm" class="lead" role="status"></p>`;
+}
+async function copyCode(){
+ const t=document.getElementById('cd');
+ try{await navigator.clipboard.writeText(t.value);document.getElementById('cm').textContent='복사했어요. 카카오톡에 붙여넣어 보내세요.'}
+ catch(e){t.select();document.getElementById('cm').textContent='코드를 길게 눌러 직접 복사해 주세요.'}
+}
+
+/* ---------- 채점 카드 ---------- */
+const textsOf=s=>{try{return s?JSON.parse(s):{}}catch(e){return{}}};
+function grade1(sub,qs){
+ const t=textsOf(sub.texts);
+ const rows=qs.map((q,i)=>{const dk=sub.answers[i]===-2;return{q,dk,open:!!q.open,ok:!dk&&!q.open&&sub.answers[i]===q.answer,mine:dk?'잘 몰라요':q.open?t[i]:(q.options||[])[sub.answers[i]]}});
+ const mc=rows.filter(r=>!r.open);
+ return{rows,mc,tot:mc.filter(r=>r.ok).length,nopen:rows.length-mc.length,nk:rows.filter(r=>r.dk).length};
+}
+// mode: 'list'(교사) | 'student'
+function card(sub,qs,mode){
+ const st=mode==='student';
+ if(!qs||sub.answers.length!==qs.length)return `<div class="res" style="--c:var(--no)"><h3>채점할 수 없는 제출</h3><div class="weak">${esc(sub.name)}</div></div>`;
+ const g=grade1(sub,qs);
+ const per=Object.keys(SUBJ).map(k=>{const r=g.mc.filter(x=>x.q.s===k);return r.length?`<span class="chip" style="--c:${SUBJ[k].c}">${SUBJ[k].n} ${r.filter(x=>x.ok).length}/${r.length}</span>`:''}).join('');
+ const items=g.rows.map((r,i)=>`<div class="wrong"><b style="color:${r.dk?'var(--s)':r.open?'var(--e)':r.ok?'var(--ok)':'var(--no)'}">${r.dk?'몰라요':r.open?(st?'선생님 확인':'직접 확인'):r.ok?'정답':'오답'}</b> ${i+1}번 ${SUBJ[r.q.s].n} · ${esc(r.q.unit)}<br><span style="white-space:pre-line">${rich(r.q.q)}</span><br>${st?'내 답':'학생 답'}: ${r.open?esc(r.mine??'(미응답)'):rich(r.mine??'(미응답)')}${r.open?`<br>모범 답안: ${rich(r.q.model)}`:r.ok?'':`<br>정답: ${rich(r.q.options[r.q.answer])}`}<br><span class="weak">${rich(r.q.exp)}</span></div>`).join('');
+ const info=`${sub.at?when(sub.at)+' 제출 · ':''}${sub.grade?sub.grade+'학년 · ':''}${fmt(sub.setId)} 문제${g.nk?` · 몰라요 ${g.nk}개`:''}${g.nopen?` · 서술형 ${g.nopen}문항은 ${st?'선생님이 확인해요':'직접 확인'}`:''}`;
+ return `<div class="res" style="--c:var(--ink)"><h3><span>${esc(sub.name)}</span><span>정답 ${g.tot}/${g.mc.length}</span></h3>
+ <div class="weak">${info}</div><div class="chips">${per}</div>
+ ${st?items:`<details><summary>문항별 답안과 해설</summary>${items}</details>`}
+ ${mode==='list'?`<button class="home" onclick="copyLink('${sub.rid}',this)">${window.LTApp?'결과 링크 보내기':'결과 링크 복사'}</button>`:''}</div>`;
+}
+async function copyLink(rid,btn){
+ const u=location.origin+location.pathname+'#r='+rid;
+ if(window.LTApp){LTApp.share('레벨 테스트 결과예요. 틀린 문제 해설을 꼭 읽어 보세요.\n'+u);return}
+ try{await navigator.clipboard.writeText(u);btn.textContent='복사했어요';setTimeout(()=>btn.textContent='결과 링크 복사',2000)}
+ catch(e){if(btn.nextElementSibling&&btn.nextElementSibling.tagName==='INPUT')return;const i=document.createElement('input');i.value=u;i.readOnly=true;i.style.marginTop='8px';btn.after(i);i.select()}
+}
+const fail=(t,m)=>{$.innerHTML=`<h1 class="jua">${t}</h1><p class="lead">${m}</p><button class="all" onclick="route()">다시 시도</button>`};
+
+/* ---------- 학생: 결과 ---------- */
+async function result(rid){
+ $.innerHTML=`<p class="lead">결과를 불러오는 중…</p>`;
+ try{
+  const r=await getJSON(`${API}/result?rid=${encodeURIComponent(rid)}`);
+  if(r.status===404||r.status===400){$.innerHTML=`<h1 class="jua">결과를 찾을 수 없어요</h1><p class="lead">링크가 정확한지 선생님께 확인해 주세요.</p><button class="home" onclick="location.hash=''">처음으로</button>`;return}
+  if(!r.ok)throw 0;
+  const x=r.j;
+  if(x.locked){
+   $.innerHTML=`<h1 class="jua">선생님이 확인 중이에요</h1><p class="lead">${esc(x.name)}님의 ${fmt(x.setId)} ${x.grade}학년 답안은 잘 제출됐어요. 선생님이 OK하면 이 화면에서 점수와 정답, 해설을 볼 수 있어요.</p>
+   <button class="all" onclick="route()">새로 고침</button><button class="home" onclick="location.hash=''">처음으로</button>`;return;
+  }
+  $.innerHTML=`<h1 class="jua">레벨 테스트 결과</h1><p class="lead">틀린 문제는 정답과 해설을 꼭 읽어 보세요.</p>`+card(x,x.questions,'student')+`<button class="home" onclick="location.hash=''">처음으로</button>`;
+ }catch(e){fail('불러오지 못했어요','인터넷 연결을 확인하고 다시 시도해 주세요.')}
+}
+
+/* ---------- 교사 화면 ---------- */
+let T={key:'',date:null,data:null,tab:4,app:false};
+async function teacherLoad(date){
+ $.innerHTML=`<h1 class="jua">채점 화면</h1><p class="lead">불러오는 중…</p>`;
+ try{
+  const r=await getJSON(`${API}/teacher?key=${encodeURIComponent(T.key)}${date?'&date='+date:''}`);
+  if(r.status===403){$.innerHTML=`<h1 class="jua">권한이 없어요</h1><p class="lead">채점 주소(키)가 맞는지 확인해 주세요.</p>`;return}
+  if(!r.ok)throw 0;
+  T.data=r.j;T.date=r.j.date;teacherView();
+ }catch(e){fail('불러오지 못했어요','인터넷 연결을 확인하고 다시 시도해 주세요.')}
+}
+function teacherView(){
+ const d=T.data;
+ if(!d.date){$.innerHTML=`<h1 class="jua">채점 화면</h1><p class="lead">아직 만들어진 문제가 없어요.</p>`;return}
+ const s=d.sets.find(x=>x.grade===T.tab),subs=d.subs.filter(x=>x.grade===T.tab);
+ let body='';
+ if(!s)body=`<div class="box"><p class="lead" style="margin:0">${fmt(d.date)} ${T.tab}학년 문제가 없어요.</p></div>`;
+ else{
+  const gs=subs.map(x=>grade1(x,s.questions));
+  const n=s.questions.filter(q=>!q.open).length;
+  const avg=gs.length?(gs.reduce((a,g)=>a+g.tot,0)/gs.length).toFixed(1):'-';
+  const wrongRate=s.questions.map((q,i)=>({i,q,rate:q.open||!subs.length?-1:subs.filter(x=>x.answers[i]!==q.answer).length/subs.length})).filter(x=>x.rate>0).sort((a,b)=>b.rate-a.rate).slice(0,3);
+  body=`<div class="box">
+   <div class="row"><b>${T.tab}학년 · 제출 ${subs.length}명</b><span class="pill">평균 정답 ${avg}/${n}</span><span class="pill ${s.released?'on':''}">${s.released?'정답 공개 중':'정답 비공개'}</span></div>
+   ${wrongRate.length?`<div class="weak" style="margin-top:8px">많이 틀린 문항: ${wrongRate.map(w=>`${w.i+1}번(${SUBJ[w.q.s].n} ${esc(w.q.unit)}) ${Math.round(w.rate*100)}%`).join(', ')}</div>`:''}
+   <button class="rel ${s.released?'off':''}" onclick="release(${!s.released})">${s.released?'공개 취소 (다시 숨기기)':'OK — 학생에게 정답·해설 공개'}</button>
+   <div class="weak" style="margin-top:6px">공개하면 ${fmt(d.date)} ${T.tab}학년을 낸 모든 학생이 자기 결과 화면에서 점수·정답·해설을 볼 수 있어요.</div>
+  </div>
+  <details class="box"><summary>문제와 정답 미리보기 (${s.questions.length}문항)</summary>${s.questions.map((q,i)=>`<div class="wrong"><b>${i+1}번</b> ${SUBJ[q.s].n} · ${esc(q.unit)}${q.passage&&(i===0||s.questions[i-1].passage!==q.passage)?`<div class="psg">${esc(q.passage)}</div>`:'<br>'}${q.fig?`<div class="fig">${q.fig}</div>`:''}<span style="white-space:pre-line">${rich(q.q)}</span><br>${q.open?`모범 답안: ${rich(q.model)}`:q.options.map((o,j)=>`<span style="${j===q.answer?'color:var(--ok);font-weight:700':''}">${'①②③④'[j]} ${rich(o)}</span>`).join('<br>')}<br><span class="weak">${rich(q.exp)}</span></div>`).join('')}</details>
+  <h2 class="sec">제출한 학생</h2>
+  ${subs.map(x=>card(x,s.questions,'list')).join('')||'<p class="lead">아직 제출한 학생이 없어요.</p>'}`;
+ }
+ $.innerHTML=`<h1 class="jua">채점 화면</h1>
+ <label for="dt">날짜</label><select id="dt" onchange="teacherLoad(this.value)">${d.dates.map(x=>`<option value="${x}" ${x===d.date?'selected':''}>${fmt(x)}</option>`).join('')}</select>
+ <div class="grades" style="margin-top:12px">${[4,5].map(g=>`<button class="gbtn ${T.tab===g?'pick':''}" onclick="T.tab=${g};teacherView()">${g}학년 (${d.subs.filter(x=>x.grade===g).length})</button>`).join('')}</div>
+ <button class="home" onclick="teacherLoad(T.date)">새로 고침</button>
+ <div style="margin-top:14px">${body}</div>
+ <p class="weak">전송 실패로 제출 코드를 받았다면 <a href="#teacher" style="color:var(--e)">제출 코드 등록하기</a></p>
+ ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
+}
+async function release(on){
+ const btn=document.querySelector('.rel');btn.disabled=true;btn.textContent='처리 중…';
+ try{const r=await postJSON(API+'/release',{key:T.key,date:T.date,grade:T.tab,released:on});if(!r.ok)throw 0;teacherLoad(T.date)}
+ catch(e){btn.disabled=false;btn.textContent='실패했어요. 다시 눌러 주세요.'}
+}
+function teacherCode(){
+ $.innerHTML=`<h1 class="jua">제출 코드 등록</h1>
+ <p class="lead">전송이 안 된 학생이 보낸 제출 코드를 붙여넣으세요. 여러 개면 한 줄에 하나씩 넣어요. 등록하면 채점 화면 목록에 나타나요.</p>
+ <textarea id="in" class="code" rows="6" placeholder="제출 코드 붙여넣기"></textarea>
+ <button class="all" onclick="registerCodes()">등록하기</button><div id="out" style="margin-top:12px"></div>`;
+}
+async function registerCodes(){
+ const lines=document.getElementById('in').value.split(/\s*\n\s*/).filter(Boolean),out=[];
+ for(const l of lines){
+  let p;try{p=dec(l)}catch(e){out.push(`<div class="weak">읽을 수 없는 코드: ${esc(l.slice(0,20))}…</div>`);continue}
+  try{const r=await postJSON(API+'/submit',p);out.push(r.ok?`<div style="color:var(--ok)">${esc(p.name)} (${p.grade}학년 ${fmt(p.setId)}) 등록 완료</div>`:`<div style="color:var(--no)">${esc(p.name||'')} 등록 실패</div>`)}
+  catch(e){out.push(`<div style="color:var(--no)">${esc(p.name||'')} 등록 실패 (인터넷 확인)</div>`)}
+ }
+ document.getElementById('out').innerHTML=out.join('')||'<p class="lead">코드를 붙여넣어 주세요.</p>';
+}
+
+/* ---------- 안드로이드 앱(선생님 폰) ---------- */
+const STUDENT_URL=location.origin+location.pathname;
+function appLogin(err){
+ $.innerHTML=`<h1 class="jua">레벨 테스트 관리</h1>
+ <p class="lead">처음 한 번만 채점 주소(또는 키)를 붙여넣어 주세요. 이 폰에만 저장돼요.</p>
+ <input id="tk" placeholder="채점 주소 붙여넣기" autocomplete="off">
+ <button class="all" onclick="appSave()">시작하기</button>
+ <p class="lead" role="status" style="margin-top:10px;color:var(--no)">${err||''}</p>`;
+}
+async function appSave(){
+ const v=document.getElementById('tk').value.trim(),m=v.match(/#teacher=([^&\s#]+)/),k=decodeURIComponent(m?m[1]:v);
+ if(!k)return appLogin('주소를 붙여넣어 주세요.');
+ try{const r=await getJSON(`${API}/teacher?key=${encodeURIComponent(k)}`);if(r.status===403)return appLogin('채점 주소가 맞지 않아요. 다시 확인해 주세요.');if(!r.ok)throw 0}
+ catch(e){return appLogin('인터넷 연결을 확인해 주세요.')}
+ store.set('lt_tkey',k);route();
+}
+function appLogout(){store.set('lt_tkey','');T.key='';appLogin()}
+function shareStudent(){
+ const t='오늘의 레벨 테스트 (매일 오후 3시 새 문제)\n바로 풀기: '+STUDENT_URL+'\n앱 설치(안드로이드): '+location.origin+'/student-app.html';
+ if(window.LTApp)LTApp.share(t);
+ else if(navigator.share)navigator.share({text:t}).catch(()=>{});
+ else navigator.clipboard?.writeText(t).then(()=>alert('복사했어요. 카카오톡에 붙여넣으세요.')).catch(()=>prompt('주소를 복사하세요',STUDENT_URL));
+}
+
+function route(){
+ const h=location.hash;scrollTo(0,0);
+ if(h==='#app'){const k=store.get('lt_tkey','');T.app=true;if(k){T.key=k;teacherLoad(T.date)}else appLogin();return}
+ if(h==='#student'){home();if(T.app)$.insertAdjacentHTML('afterbegin','<button class="home" onclick="location.hash=\'#app\'" style="margin:0 0 8px">← 선생님 화면으로</button>');return}
+ if(h==='#teacher')teacherCode();
+ else if(h.startsWith('#teacher=')){T.key=decodeURIComponent(h.slice(9));teacherLoad(T.date)}
+ else if(h.startsWith('#r='))result(h.slice(3));
+ else home();
+}
+addEventListener('hashchange',route);route();
+</script>
+</body>
+</html>
