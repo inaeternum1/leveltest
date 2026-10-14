@@ -241,6 +241,7 @@ function teacherView(){
   ${subs.map(x=>card(x,s.questions,'list')).join('')||'<p class="lead">아직 제출한 학생이 없어요.</p>'}`;
  }
  $.innerHTML=`<h1 class="jua">채점 화면</h1>
+ ${T.app?`<button class="home" onclick="location.href='../medtech/#app'">의료기술직 채점으로 →</button>`:''}
  <label for="dt">날짜</label><select id="dt" onchange="teacherLoad(this.value)">${d.dates.map(x=>`<option value="${x}" ${x===d.date?'selected':''}>${fmt(x)}</option>`).join('')}</select>
  <div class="grades" style="margin-top:12px">${[4,5].map(g=>`<button class="gbtn ${T.tab===g?'pick':''}" onclick="T.tab=${g};teacherView()">${g}학년 (${d.subs.filter(x=>x.grade===g).length})</button>`).join('')}</div>
  <button class="home" onclick="teacherLoad(T.date)">새로 고침</button>
