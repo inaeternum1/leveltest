@@ -74,6 +74,10 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 <body>
 <main id="app"></main>
 <script>
+// 새 버전 자동 반영: 폰이 예전 화면을 저장해 두었으면 version.txt와 비교해 한 번만 새로 불러온다.
+const BUILD='202610151355';
+(async()=>{try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
+ if(v&&v!==BUILD&&sessionStorage.getItem('lt_reloaded')!==v){sessionStorage.setItem('lt_reloaded',v);location.replace(location.pathname+'?v='+v+location.hash)}}catch(e){}})();
 const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
 const SUBJ={k:{n:'국어',c:'var(--k)'},e:{n:'영어',c:'var(--e)'},l:{n:'영어 듣기',c:'var(--l)'},m:{n:'수학',c:'var(--m)'},s:{n:'과학',c:'var(--s)'}};
 /* ---------- 영어 듣기: 앱은 안드로이드 음성(LTApp.speak), 브라우저는 speechSynthesis ---------- */

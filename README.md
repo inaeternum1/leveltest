@@ -17,3 +17,6 @@
 ## 데이터
 Supabase 프로젝트 `leveltest` (서울). 테이블 `sets`(날짜·학년별 문제, 정답 포함), `submissions`(제출), `config`.
 모든 테이블은 공개 키로 접근할 수 없고, Edge Function만 읽고 쓴다.
+
+## 화면을 고칠 때
+`level-test.html`을 바꾸면 `version.txt`와 파일 안의 `const BUILD='…'`를 같은 새 값(예: 202610160900)으로 함께 바꾼다. 그러면 폰에 예전 화면이 저장돼 있어도 한 번 자동으로 새로 불러온다.
