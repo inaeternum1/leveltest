@@ -40,7 +40,7 @@ jobs:
             python3 android/make_icons.py "$kind" "$W/res"
             "$BT/aapt2" compile --dir "$W/res" -o "$W/res.zip"
             "$BT/aapt2" link -I "$PF" --manifest "$W/AndroidManifest.xml" -o "$W/base.apk" "$W/res.zip" --java "$W/gen" \
-              --min-sdk-version 24 --target-sdk-version 34 --version-code "$vc" --version-name 2.0 --auto-add-overlay
+              --min-sdk-version 24 --target-sdk-version 34 --version-code "$vc" --version-name 2.1 --auto-add-overlay
             javac -encoding UTF-8 --release 11 -cp "$PF" -d "$W/classes" $(find "$W/src" "$W/gen" -name '*.java')
             "$BT/d8" --lib "$PF" --min-api 24 --release --output "$W/dex" $(find "$W/classes" -name '*.class')
             cp "$W/base.apk" "$W/unsigned.apk"
@@ -50,8 +50,8 @@ jobs:
             "$BT/apksigner" verify "leveltest-$kind.apk"
             "$BT/aapt2" dump badging "leveltest-$kind.apk" | grep -E "^package|application-label:"
           }
-          build teacher kr.leveltest.teacher "레벨테스트 관리" "$SITE/level-test.html#app" false 10
-          build student kr.leveltest.student "오늘의 레벨 테스트" "$SITE/level-test.html" true 10
+          build teacher kr.leveltest.teacher "레벨테스트 관리" "$SITE/level-test.html#app" false 11
+          build student kr.leveltest.student "오늘의 레벨 테스트" "$SITE/level-test.html" true 11
           rm -rf build ks.p12
           ls -la leveltest-*.apk
       - name: Commit APKs

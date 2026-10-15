@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="__PKG__">
   <uses-permission android:name="android.permission.INTERNET"/>
+  <!-- 안드로이드 11 이상에서 음성 엔진(TTS)을 찾으려면 필요 -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.TTS_SERVICE"/>
+    </intent>
+  </queries>
   <application android:label="__LABEL__" android:icon="@mipmap/ic_launcher" android:allowBackup="false"
       android:theme="@android:style/Theme.Material.Light.NoActionBar" android:usesCleartextTraffic="false">
     <activity android:name=".MainActivity" android:exported="true"

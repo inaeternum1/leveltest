@@ -41,12 +41,12 @@ async function isTeacher(key: unknown) {
   return diff === 0;
 }
 
-type Q = { s: string; unit: string; q: string; passage?: string; fig?: string; options?: string[]; answer?: number; open?: boolean; model?: string; exp: string };
+type Q = { s: string; unit: string; q: string; passage?: string; fig?: string; script?: string; options?: string[]; answer?: number; open?: boolean; model?: string; exp: string };
 type SetRow = { date: string; grade: number; questions: Q[]; released: boolean };
 type SubRow = { rid: string; page: string; name: string; set_id: string; grade: number | null; answers: number[]; texts: string | null; created_at: string };
 
-// 학생에게 보내는 문항: 정답·해설·모범답안 제외
-const strip = (q: Q) => ({ s: q.s, unit: q.unit, q: q.q, passage: q.passage, fig: q.fig, options: q.options, open: q.open });
+// 학생에게 보내는 문항: 정답·해설·모범답안 제외. 듣기 대본(script)은 소리로 읽어 주려고 보내지만 화면에는 표시하지 않는다.
+const strip = (q: Q) => ({ s: q.s, unit: q.unit, q: q.q, passage: q.passage, fig: q.fig, script: q.script, options: q.options, open: q.open });
 const subOut = (r: SubRow) => ({
   rid: r.rid, page: r.page, name: r.name, setId: r.set_id, grade: r.grade ?? undefined,
   answers: r.answers, texts: r.texts ?? undefined, at: new Date(r.created_at).getTime(),

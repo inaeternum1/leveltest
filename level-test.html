@@ -6,10 +6,10 @@
 <title>오늘의 레벨 테스트</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef3f8;--card:#fff;--ink:#1b2a49;--sub:#5b6b86;--line:#d3dde9;--ok:#1f9d6b;--no:#d6455d;--k:#d6455d;--e:#2f6fde;--m:#1f9d6b;--s:#d98200;
+:root{--bg:#eef3f8;--card:#fff;--ink:#1b2a49;--sub:#5b6b86;--line:#d3dde9;--ok:#1f9d6b;--no:#d6455d;--k:#d6455d;--e:#2f6fde;--m:#1f9d6b;--s:#d98200;--l:#7b4fd6;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--line:#2f3d5c;--ok:#4cd39d;--no:#ff7d92;--k:#ff7d92;--e:#7aa5ff;--m:#4cd39d;--s:#ffb43d}}
-:root[data-theme="dark"]{--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--line:#2f3d5c;--ok:#4cd39d;--no:#ff7d92;--k:#ff7d92;--e:#7aa5ff;--m:#4cd39d;--s:#ffb43d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--line:#2f3d5c;--ok:#4cd39d;--no:#ff7d92;--k:#ff7d92;--e:#7aa5ff;--m:#4cd39d;--s:#ffb43d;--l:#b79cff}}
+:root[data-theme="dark"]{--bg:#121a2b;--card:#1b2640;--ink:#eaf0fb;--sub:#9fb0cd;--line:#2f3d5c;--ok:#4cd39d;--no:#ff7d92;--k:#ff7d92;--e:#7aa5ff;--m:#4cd39d;--s:#ffb43d;--l:#b79cff}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:17px;line-height:1.6}
 h1,h2,h3,.jua{font-family:'Jua','Gowun Dodum','Apple SD Gothic Neo',sans-serif;font-weight:400}
@@ -54,6 +54,12 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 .fx span{padding:0 .22em}
 .fx span:first-child{border-bottom:1.5px solid currentColor;padding-bottom:.08em}
 .fx span:last-child{padding-top:.08em}
+.listen{display:flex;gap:8px;margin:2px 0 12px}
+.listen button{flex:1;padding:14px 8px;border:2px solid var(--l);border-radius:14px;background:color-mix(in srgb,var(--l) 12%,var(--card));color:var(--ink);font:inherit;font-family:'Jua',sans-serif;font-size:1.1rem;cursor:pointer}
+.listen button.slow{flex:.7;background:var(--card)}
+.listen button.on{background:var(--l);color:#fff}
+.script{background:color-mix(in srgb,var(--l) 10%,var(--card));border-radius:12px;padding:10px 14px;margin:6px 0;white-space:pre-line;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem}
+.mini{border:1.5px solid var(--l);background:none;color:var(--ink);border-radius:99px;padding:2px 12px;font:inherit;font-size:.85rem;cursor:pointer;margin-left:6px}
 .mine a{color:var(--e)}
 .mine li{margin:4px 0}
 .box{background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px}
@@ -68,7 +74,31 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 <main id="app"></main>
 <script>
 const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
-const SUBJ={k:{n:'국어',c:'var(--k)'},e:{n:'영어',c:'var(--e)'},m:{n:'수학',c:'var(--m)'},s:{n:'과학',c:'var(--s)'}};
+const SUBJ={k:{n:'국어',c:'var(--k)'},e:{n:'영어',c:'var(--e)'},l:{n:'영어 듣기',c:'var(--l)'},m:{n:'수학',c:'var(--m)'},s:{n:'과학',c:'var(--s)'}};
+/* ---------- 영어 듣기: 앱은 안드로이드 음성(LTApp.speak), 브라우저는 speechSynthesis ---------- */
+const TTS=(()=>{
+ let voice=null;
+ const web='speechSynthesis' in window;
+ const pick=()=>{try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/^en[-_]US/i.test(v.lang)&&/google|samantha|female|aria|jenny/i.test(v.name))||vs.find(v=>/^en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null}catch(e){}};
+ if(web){pick();try{speechSynthesis.addEventListener('voiceschanged',pick)}catch(e){}}
+ const native=()=>!!(window.LTApp&&typeof LTApp.speak==='function');
+ // 'A: …' / 'B: …' 줄은 두 사람 목소리(높낮이)로 구분, 표시 없는 줄은 한 사람
+ const lines=s=>String(s||'').split(/\n+/).map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.match(/^([AB])\s*:\s*(.*)$/);return{b:!!m&&m[1]==='B',t:m?m[2]:l}});
+ return{
+  ok:()=>native()||web,
+  stop(){try{if(native()&&LTApp.stopSpeak)LTApp.stopSpeak();else if(web)speechSynthesis.cancel()}catch(e){}},
+  play(script,slow){
+   this.stop();const L=lines(script),rate=slow?0.6:0.9;
+   if(native()){LTApp.speak(JSON.stringify(L.map(x=>({t:x.t,p:x.b?1.35:0.95}))),rate);return true}
+   if(!web)return false;
+   L.forEach(x=>{const u=new SpeechSynthesisUtterance(x.t);u.lang='en-US';if(voice)u.voice=voice;u.rate=rate;u.pitch=x.b?1.35:0.95;speechSynthesis.speak(u)});
+   return true;
+  }
+ };
+})();
+function hear(slow){const q=set&&set.questions[idx];if(!q||!q.script)return;if(!TTS.play(q.script,slow)){const m=document.getElementById('tts-msg');if(m)m.textContent='이 기기에서는 소리를 낼 수 없어요. 선생님께 말씀드려 주세요.'}}
+function hearText(t){TTS.play(t,false)}
+
 const $=document.getElementById('app');
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // [[4/5]] -> 세로 분수, [[2 3/7]] -> 대분수 (교과서 표기)
@@ -88,7 +118,7 @@ function home(){
  name=store.get('lt_name','');grade=store.get('lt_grade',0);
  const mine=store.get('lt_mine',[]).slice(0,10);
  $.innerHTML=`<h1 class="jua">오늘의<br>레벨 테스트</h1>
- <p class="lead">국어·영어·수학·과학 20문제예요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
+ <p class="lead">국어·영어·영어 듣기·수학·과학 문제예요. 영어 듣기는 소리를 켜거나 이어폰을 끼고 풀어요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
  <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(name)}">
  <label>학년</label><div class="grades">${[4,5].map(g=>`<button class="gbtn ${grade===g?'pick':''}" onclick="pickGrade(${g})">${g}학년</button>`).join('')}</div>
  <button class="all" onclick="start()">시작하기</button>
@@ -124,14 +154,14 @@ function show(){
   :q.options.map((o,i)=>`<button class="opt ${sel[idx]===i?'pick':''}" onclick="pick(${i})">${rich(o)}</button>`).join(''))+dk;
  $.innerHTML=`<div class="meta"><span>${SUBJ[q.s].n} · ${grade}학년</span><span>${idx+1} / ${qs.length}</span></div>
  <div class="bar" style="--c:${c}"><i style="width:${idx/qs.length*100}%"></i></div>
- <div class="q" style="--c:${c}"><span class="tag">${esc(q.unit)}</span>${q.passage?`<div class="psg">${esc(q.passage)}</div>`:''}${q.fig?`<div class="fig">${q.fig}</div>`:''}<h2>${rich(q.q)}</h2>${body}
+ <div class="q" style="--c:${c}"><span class="tag">${esc(q.unit)}</span>${q.passage?`<div class="psg">${esc(q.passage)}</div>`:''}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.s==='l'&&q.script?`<div class="listen"><button onclick="hear(false)">▶ 듣기</button><button class="slow" onclick="hear(true)">천천히</button></div><p id="tts-msg" class="weak" role="status" style="margin:-6px 0 8px">${TTS.ok()?'여러 번 들어도 괜찮아요.':'이 기기에서는 소리를 낼 수 없어요. 선생님께 말씀드려 주세요.'}</p>`:''}<h2>${rich(q.q)}</h2>${body}
  <button class="next" style="--c:${c}" ${ready()?'':'disabled'} onclick="next()">${last?'제출하기':'다음 문제'}</button>
  ${idx>0?`<button class="home" onclick="prev()">이전 문제</button>`:''}</div>`;
 }
 function typed(v){txt[idx]=v;if(v.trim()&&sel[idx]===-2){delete sel[idx];document.querySelector('.dk').classList.remove('pick')}document.querySelector('.next').disabled=!ready()}
 function pick(i){sel[idx]=i;if(i===-2)delete txt[idx];show()}
-function prev(){if(idx>0){idx--;show();scrollTo(0,0)}}
-function next(){if(idx<set.questions.length-1){idx++;show();scrollTo(0,0)}else done()}
+function prev(){TTS.stop();if(idx>0){idx--;show();scrollTo(0,0)}}
+function next(){TTS.stop();if(idx<set.questions.length-1){idx++;show();scrollTo(0,0)}else done()}
 function payload(){
  const p={page:PAGE,name,grade,setId:set.date,answers:set.questions.map((q,i)=>sel[i]===-2?-2:q.open?-1:sel[i])};
  const t={};for(const k in txt)if(sel[k]!==-2&&String(txt[k]).trim())t[k]=txt[k];
@@ -177,7 +207,7 @@ function card(sub,qs,mode){
  if(!qs||sub.answers.length!==qs.length)return `<div class="res" style="--c:var(--no)"><h3>채점할 수 없는 제출</h3><div class="weak">${esc(sub.name)}</div></div>`;
  const g=grade1(sub,qs);
  const per=Object.keys(SUBJ).map(k=>{const r=g.mc.filter(x=>x.q.s===k);return r.length?`<span class="chip" style="--c:${SUBJ[k].c}">${SUBJ[k].n} ${r.filter(x=>x.ok).length}/${r.length}</span>`:''}).join('');
- const items=g.rows.map((r,i)=>`<div class="wrong"><b style="color:${r.dk?'var(--s)':r.open?'var(--e)':r.ok?'var(--ok)':'var(--no)'}">${r.dk?'몰라요':r.open?(st?'선생님 확인':'직접 확인'):r.ok?'정답':'오답'}</b> ${i+1}번 ${SUBJ[r.q.s].n} · ${esc(r.q.unit)}<br><span style="white-space:pre-line">${rich(r.q.q)}</span><br>${st?'내 답':'학생 답'}: ${r.open?esc(r.mine??'(미응답)'):rich(r.mine??'(미응답)')}${r.open?`<br>모범 답안: ${rich(r.q.model)}`:r.ok?'':`<br>정답: ${rich(r.q.options[r.q.answer])}`}<br><span class="weak">${rich(r.q.exp)}</span></div>`).join('');
+ const items=g.rows.map((r,i)=>`<div class="wrong"><b style="color:${r.dk?'var(--s)':r.open?'var(--e)':r.ok?'var(--ok)':'var(--no)'}">${r.dk?'몰라요':r.open?(st?'선생님 확인':'직접 확인'):r.ok?'정답':'오답'}</b> ${i+1}번 ${SUBJ[r.q.s].n} · ${esc(r.q.unit)}${r.q.script?`<button class="mini" data-s="${esc(r.q.script)}" onclick="hearText(this.dataset.s)">▶ 다시 듣기</button><div class="script">${esc(r.q.script)}</div>`:'<br>'}<span style="white-space:pre-line">${rich(r.q.q)}</span><br>${st?'내 답':'학생 답'}: ${r.open?esc(r.mine??'(미응답)'):rich(r.mine??'(미응답)')}${r.open?`<br>모범 답안: ${rich(r.q.model)}`:r.ok?'':`<br>정답: ${rich(r.q.options[r.q.answer])}`}<br><span class="weak">${rich(r.q.exp)}</span></div>`).join('');
  const info=`${sub.at?when(sub.at)+' 제출 · ':''}${sub.grade?sub.grade+'학년 · ':''}${fmt(sub.setId)} 문제${g.nk?` · 몰라요 ${g.nk}개`:''}${g.nopen?` · 서술형 ${g.nopen}문항은 ${st?'선생님이 확인해요':'직접 확인'}`:''}`;
  return `<div class="res" style="--c:var(--ink)"><h3><span>${esc(sub.name)}</span><span>정답 ${g.tot}/${g.mc.length}</span></h3>
  <div class="weak">${info}</div><div class="chips">${per}</div>
@@ -236,7 +266,7 @@ function teacherView(){
    <button class="rel ${s.released?'off':''}" onclick="release(${!s.released})">${s.released?'공개 취소 (다시 숨기기)':'OK — 학생에게 정답·해설 공개'}</button>
    <div class="weak" style="margin-top:6px">공개하면 ${fmt(d.date)} ${T.tab}학년을 낸 모든 학생이 자기 결과 화면에서 점수·정답·해설을 볼 수 있어요.</div>
   </div>
-  <details class="box"><summary>문제와 정답 미리보기 (${s.questions.length}문항)</summary>${s.questions.map((q,i)=>`<div class="wrong"><b>${i+1}번</b> ${SUBJ[q.s].n} · ${esc(q.unit)}${q.passage&&(i===0||s.questions[i-1].passage!==q.passage)?`<div class="psg">${esc(q.passage)}</div>`:'<br>'}${q.fig?`<div class="fig">${q.fig}</div>`:''}<span style="white-space:pre-line">${rich(q.q)}</span><br>${q.open?`모범 답안: ${rich(q.model)}`:q.options.map((o,j)=>`<span style="${j===q.answer?'color:var(--ok);font-weight:700':''}">${'①②③④'[j]} ${rich(o)}</span>`).join('<br>')}<br><span class="weak">${rich(q.exp)}</span></div>`).join('')}</details>
+  <details class="box"><summary>문제와 정답 미리보기 (${s.questions.length}문항)</summary>${s.questions.map((q,i)=>`<div class="wrong"><b>${i+1}번</b> ${SUBJ[q.s].n} · ${esc(q.unit)}${q.passage&&(i===0||s.questions[i-1].passage!==q.passage)?`<div class="psg">${esc(q.passage)}</div>`:'<br>'}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.script?`<button class="mini" data-s="${esc(q.script)}" onclick="hearText(this.dataset.s)">▶ 들어 보기</button><div class="script">${esc(q.script)}</div>`:''}<span style="white-space:pre-line">${rich(q.q)}</span><br>${q.open?`모범 답안: ${rich(q.model)}`:q.options.map((o,j)=>`<span style="${j===q.answer?'color:var(--ok);font-weight:700':''}">${'①②③④'[j]} ${rich(o)}</span>`).join('<br>')}<br><span class="weak">${rich(q.exp)}</span></div>`).join('')}</details>
   <h2 class="sec">제출한 학생</h2>
   ${subs.map(x=>card(x,s.questions,'list')).join('')||'<p class="lead">아직 제출한 학생이 없어요.</p>'}`;
  }
