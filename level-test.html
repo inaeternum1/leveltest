@@ -122,6 +122,7 @@ function home(){
  <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(name)}">
  <label>학년</label><div class="grades">${[4,5].map(g=>`<button class="gbtn ${grade===g?'pick':''}" onclick="pickGrade(${g})">${g}학년</button>`).join('')}</div>
  <button class="all" onclick="start()">시작하기</button>
+ <button class="home" onclick="location.hash='#demo'">▶ 영어 듣기 소리 확인 (연습, 저장 안 돼요)</button>
  <p id="msg" class="lead" role="status" style="margin-top:10px"></p>
  ${mine.length?`<h2 class="sec">내 결과</h2><div class="box mine"><ul style="margin:0;padding-left:18px">${mine.map(m=>`<li><a href="#r=${m.rid}">${fmt(m.date)} ${m.grade}학년 · ${esc(m.name)}</a></li>`).join('')}</ul><div class="weak" style="margin-top:6px">선생님이 확인하면 정답과 해설이 열려요.</div></div>`:''}`;
 }
@@ -152,7 +153,7 @@ function show(){
  const dk=`<button class="opt dk ${sel[idx]===-2?'pick':''}" onclick="pick(-2)">잘 몰라요 (찍지 않고 넘기기)</button>`;
  const body=(q.open?`<textarea id="ans" rows="4" maxlength="300" oninput="typed(this.value)" placeholder="여기에 쓰세요">${esc(txt[idx]||'')}</textarea>`
   :q.options.map((o,i)=>`<button class="opt ${sel[idx]===i?'pick':''}" onclick="pick(${i})">${rich(o)}</button>`).join(''))+dk;
- $.innerHTML=`<div class="meta"><span>${SUBJ[q.s].n} · ${grade}학년</span><span>${idx+1} / ${qs.length}</span></div>
+ $.innerHTML=`<div class="meta"><span>${SUBJ[q.s].n} · ${set.demo?'연습':grade+'학년'}</span><span>${idx+1} / ${qs.length}</span></div>
  <div class="bar" style="--c:${c}"><i style="width:${idx/qs.length*100}%"></i></div>
  <div class="q" style="--c:${c}"><span class="tag">${esc(q.unit)}</span>${q.passage?`<div class="psg">${esc(q.passage)}</div>`:''}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.s==='l'&&q.script?`<div class="listen"><button onclick="hear(false)">▶ 듣기</button><button class="slow" onclick="hear(true)">천천히</button></div><p id="tts-msg" class="weak" role="status" style="margin:-6px 0 8px">${TTS.ok()?'여러 번 들어도 괜찮아요.':'이 기기에서는 소리를 낼 수 없어요. 선생님께 말씀드려 주세요.'}</p>`:''}<h2>${rich(q.q)}</h2>${body}
  <button class="next" style="--c:${c}" ${ready()?'':'disabled'} onclick="next()">${last?'제출하기':'다음 문제'}</button>
@@ -161,7 +162,25 @@ function show(){
 function typed(v){txt[idx]=v;if(v.trim()&&sel[idx]===-2){delete sel[idx];document.querySelector('.dk').classList.remove('pick')}document.querySelector('.next').disabled=!ready()}
 function pick(i){sel[idx]=i;if(i===-2)delete txt[idx];show()}
 function prev(){TTS.stop();if(idx>0){idx--;show();scrollTo(0,0)}}
-function next(){TTS.stop();if(idx<set.questions.length-1){idx++;show();scrollTo(0,0)}else done()}
+function next(){TTS.stop();if(idx<set.questions.length-1){idx++;show();scrollTo(0,0)}else if(set.demo)demoDone();else done()}
+
+/* ---------- 영어 듣기 연습(저장 안 함): 소리·볼륨 확인용 ---------- */
+const DEMO=[
+ {s:'l',unit:'연습 1 · 색깔',script:"A: What color is your bag?\nB: It's yellow.",q:'대화를 듣고, B의 가방 색깔을 고르세요.',options:['빨간색','노란색','파란색','초록색'],answer:1,exp:"B가 It's yellow.(노란색이야.)라고 했어요."},
+ {s:'l',unit:'연습 2 · 개수',script:'A: How many apples do you have?\nB: I have five apples.',q:'대화를 듣고, B가 가진 사과는 몇 개인지 고르세요.',options:['3개','4개','5개','15개'],answer:2,exp:'B가 I have five apples.(사과가 다섯 개 있어.)라고 했어요. fifteen(15)과 헷갈리지 않게 끝까지 들어요.'},
+ {s:'l',unit:'연습 3 · 한 일',script:'A: What did you do last Sunday?\nB: I went to the library and read books.\nA: That sounds fun.',q:'대화를 듣고, B가 지난 일요일에 한 일을 고르세요.',options:['도서관에서 책 읽기','공원에서 자전거 타기','집에서 숙제하기','영화 보기'],answer:0,exp:'B가 I went to the library and read books.(도서관에 가서 책을 읽었어.)라고 했어요.'}
+];
+function demo(){
+ set={demo:true,date:'',grade:0,questions:DEMO.map(({answer,exp,...q})=>q)};idx=0;sel=[];txt={};
+ show();
+ $.insertAdjacentHTML('afterbegin',`<p class="lead" style="margin:0 0 10px">연습 문제예요. 점수는 저장되지 않아요. <b>▶ 듣기</b>를 눌러 소리가 잘 들리는지 확인해 보세요.</p>`);
+}
+function demoDone(){
+ const sub={name:name||'연습',setId:'',answers:DEMO.map((_,i)=>sel[i]===undefined?-2:sel[i])};
+ $.innerHTML=`<h1 class="jua">연습 결과</h1><p class="lead">진짜 문제에서도 이렇게 소리가 나와요. 대본과 해설을 확인해 보세요.</p>`+card(sub,DEMO,'student')+
+ `<button class="all" onclick="demo()">다시 해 보기</button><button class="home" onclick="location.hash=T.app?'#app':'';if(!T.app)home()">처음으로</button>`;
+ scrollTo(0,0);
+}
 function payload(){
  const p={page:PAGE,name,grade,setId:set.date,answers:set.questions.map((q,i)=>sel[i]===-2?-2:q.open?-1:sel[i])};
  const t={};for(const k in txt)if(sel[k]!==-2&&String(txt[k]).trim())t[k]=txt[k];
@@ -277,7 +296,7 @@ function teacherView(){
  <button class="home" onclick="teacherLoad(T.date)">새로 고침</button>
  <div style="margin-top:14px">${body}</div>
  <p class="weak">전송 실패로 제출 코드를 받았다면 <a href="#teacher" style="color:var(--e)">제출 코드 등록하기</a></p>
- ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
+ ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="location.hash='#demo'">▶ 영어 듣기 소리 확인</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
 }
 async function release(on){
  const btn=document.querySelector('.rel');btn.disabled=true;btn.textContent='처리 중…';
@@ -328,6 +347,7 @@ function route(){
  const h=location.hash;scrollTo(0,0);
  if(h==='#app'){const k=store.get('lt_tkey','');T.app=true;if(k){T.key=k;teacherLoad(T.date)}else appLogin();return}
  if(h==='#student'){home();if(T.app)$.insertAdjacentHTML('afterbegin','<button class="home" onclick="location.hash=\'#app\'" style="margin:0 0 8px">← 선생님 화면으로</button>');return}
+ if(h==='#demo'){demo();if(T.app)$.insertAdjacentHTML('afterbegin','<button class="home" onclick="location.hash=\'#app\'" style="margin:0 0 8px">← 선생님 화면으로</button>');return}
  if(h==='#teacher')teacherCode();
  else if(h.startsWith('#teacher=')){T.key=decodeURIComponent(h.slice(9));teacherLoad(T.date)}
  else if(h.startsWith('#r='))result(h.slice(3));
