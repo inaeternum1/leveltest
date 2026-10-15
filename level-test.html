@@ -60,6 +60,7 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 .listen button.on{background:var(--l);color:#fff}
 .script{background:color-mix(in srgb,var(--l) 10%,var(--card));border-radius:12px;padding:10px 14px;margin:6px 0;white-space:pre-line;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem}
 .mini{border:1.5px solid var(--l);background:none;color:var(--ink);border-radius:99px;padding:2px 12px;font:inherit;font-size:.85rem;cursor:pointer;margin-left:6px}
+.numin{font-size:1.5rem;text-align:center;letter-spacing:.05em;margin-top:6px}
 .mine a{color:var(--e)}
 .mine li{margin:4px 0}
 .box{background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px}
@@ -122,7 +123,7 @@ function home(){
  <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(name)}">
  <label>학년</label><div class="grades">${[4,5].map(g=>`<button class="gbtn ${grade===g?'pick':''}" onclick="pickGrade(${g})">${g}학년</button>`).join('')}</div>
  <button class="all" onclick="start()">시작하기</button>
- <button class="home" onclick="location.hash='#demo'">▶ 영어 듣기 소리 확인 (연습, 저장 안 돼요)</button>
+ <button class="home" onclick="location.hash='#demo'">▶ 연습 문제: 영어 듣기·사고력 수학 (저장 안 돼요)</button>
  <p id="msg" class="lead" role="status" style="margin-top:10px"></p>
  ${mine.length?`<h2 class="sec">내 결과</h2><div class="box mine"><ul style="margin:0;padding-left:18px">${mine.map(m=>`<li><a href="#r=${m.rid}">${fmt(m.date)} ${m.grade}학년 · ${esc(m.name)}</a></li>`).join('')}</ul><div class="weak" style="margin-top:6px">선생님이 확인하면 정답과 해설이 열려요.</div></div>`:''}`;
 }
@@ -147,11 +148,12 @@ async function start(){
  }
  idx=0;sel=[];txt={};show();
 }
-function ready(){const q=set.questions[idx];if(sel[idx]===-2)return true;return q.open?(txt[idx]||'').trim().length>0:sel[idx]!==undefined}
+function ready(){const q=set.questions[idx];if(sel[idx]===-2)return true;return (q.open||q.num)?(txt[idx]||'').trim().length>0:sel[idx]!==undefined}
 function show(){
  const qs=set.questions,q=qs[idx],c=SUBJ[q.s].c,last=idx===qs.length-1;
  const dk=`<button class="opt dk ${sel[idx]===-2?'pick':''}" onclick="pick(-2)">잘 몰라요 (찍지 않고 넘기기)</button>`;
- const body=(q.open?`<textarea id="ans" rows="4" maxlength="300" oninput="typed(this.value)" placeholder="여기에 쓰세요">${esc(txt[idx]||'')}</textarea>`
+ const body=(q.num?`<input id="ans" class="numin" inputmode="decimal" autocomplete="off" maxlength="12" oninput="typed(this.value)" placeholder="답을 숫자로 쓰세요" value="${esc(txt[idx]||'')}"><p class="weak" style="margin:6px 0 0">개, cm 같은 단위는 빼고 숫자만 써요. 종이에 풀어 봐도 좋아요.</p>`
+  :q.open?`<textarea id="ans" rows="4" maxlength="300" oninput="typed(this.value)" placeholder="여기에 쓰세요">${esc(txt[idx]||'')}</textarea>`
   :q.options.map((o,i)=>`<button class="opt ${sel[idx]===i?'pick':''}" onclick="pick(${i})">${rich(o)}</button>`).join(''))+dk;
  $.innerHTML=`<div class="meta"><span>${SUBJ[q.s].n} · ${set.demo?'연습':grade+'학년'}</span><span>${idx+1} / ${qs.length}</span></div>
  <div class="bar" style="--c:${c}"><i style="width:${idx/qs.length*100}%"></i></div>
@@ -169,20 +171,24 @@ const DEMO=[
  {s:'l',unit:'연습 1 · 바꾼 말',script:"A: Can I have the red cap, please?\nB: Sure. Here you are.\nA: Oh, wait. Not the red one. I want the blue one.\nB: Okay. Here is the blue cap.",q:'대화를 듣고, A가 마지막에 사려는 모자의 색깔을 고르세요.',options:['빨간색','파란색','노란색','초록색'],answer:1,exp:"처음에는 red cap(빨간 모자)을 달라고 했지만, Not the red one. I want the blue one.(빨간 거 말고 파란 걸로 할게요.)이라고 바꿨어요."},
  {s:'l',unit:'연습 2 · 가격 더하기',script:"A: How much is this pencil?\nB: It's two dollars.\nA: And how much is the eraser?\nB: It's one dollar.\nA: I'll take both, please.",q:'대화를 듣고, A가 내야 할 돈은 모두 얼마인지 고르세요.',options:['1달러','2달러','3달러','4달러'],answer:2,exp:"연필은 two dollars(2달러), 지우개는 one dollar(1달러)이고, I'll take both.(둘 다 살게요.)라고 했으니 2 + 1 = 3달러예요."},
  {s:'l',unit:'연습 3 · 장소 추론',script:"A: Excuse me. I'm looking for a book about dinosaurs.\nB: Go to the second floor. The science books are next to the window.\nA: Thank you. Can I borrow three books?\nB: Yes, you can borrow five books for two weeks.",q:'대화를 듣고, 두 사람이 대화하는 장소로 알맞은 곳을 고르세요.',options:['도서관','서점','박물관','학교 식당'],answer:0,exp:"borrow(빌리다), you can borrow five books for two weeks.(책을 2주 동안 5권 빌릴 수 있어요.)라는 말로 보아 책을 빌려주는 도서관이에요. 서점은 책을 사는 곳이라 답이 아니에요."}
+,
+ {s:'m',unit:'사고력 · 경우 따지기',num:true,ans:'9',q:'1부터 100까지의 자연수 중에서 각 자리 숫자를 더하면 10이 되는 수는 모두 몇 개인가요?\n(예: 37은 3 + 7 = 10)',exp:'한 자리 수는 가장 커도 9라서 안 돼요. 두 자리 수는 십의 자리가 1~9일 때 일의 자리가 9, 8, …, 1로 하나씩 정해져서 19, 28, 37, 46, 55, 64, 73, 82, 91로 9개예요. 100은 1 + 0 + 0 = 1이에요.'},
+ {s:'m',unit:'사고력 · 규칙 찾기',num:true,ans:'46',q:'성냥개비로 정사각형을 옆으로 이어 붙여 만들고 있어요. 정사각형 1개는 4개, 2개는 7개, 3개는 10개가 필요해요. 정사각형 15개를 만들려면 성냥개비는 모두 몇 개 필요한가요?',exp:'첫 정사각형에 4개가 들고, 하나 붙일 때마다 옆 변을 같이 써서 3개씩 늘어나요. 4 + 3 × 14 = 46(개)예요. 3 × 15 + 1로 생각해도 돼요.'}
 ];
 function demo(){
  set={demo:true,date:'',grade:0,questions:DEMO.map(({answer,exp,...q})=>q)};idx=0;sel=[];txt={};
  show();
- $.insertAdjacentHTML('afterbegin',`<p class="lead" style="margin:0 0 10px">연습 문제예요. 점수는 저장되지 않아요. <b>▶ 듣기</b>를 눌러 소리가 잘 들리는지 확인해 보세요.</p>`);
+ $.insertAdjacentHTML('afterbegin',`<p class="lead" style="margin:0 0 10px">연습 문제예요. 점수는 저장되지 않아요. 영어 듣기 3문제는 <b>▶ 듣기</b>를 눌러 소리를 확인하고, 마지막 2문제는 생각을 많이 해야 하는 사고력 수학이에요.</p>`);
 }
 function demoDone(){
- const sub={name:name||'연습',setId:'',answers:DEMO.map((_,i)=>sel[i]===undefined?-2:sel[i])};
+ const t={};DEMO.forEach((q,i)=>{if(q.num&&sel[i]!==-2&&txt[i])t[i]=txt[i]});
+ const sub={name:name||'연습',setId:'',texts:JSON.stringify(t),answers:DEMO.map((q,i)=>sel[i]===-2||(sel[i]===undefined&&!q.num)?-2:q.num?-1:sel[i])};
  $.innerHTML=`<h1 class="jua">연습 결과</h1><p class="lead">진짜 문제에서도 이렇게 소리가 나와요. 대본과 해설을 확인해 보세요.</p>`+card(sub,DEMO,'student')+
  `<button class="all" onclick="demo()">다시 해 보기</button><button class="home" onclick="location.hash=T.app?'#app':'';if(!T.app)home()">처음으로</button>`;
  scrollTo(0,0);
 }
 function payload(){
- const p={page:PAGE,name,grade,setId:set.date,answers:set.questions.map((q,i)=>sel[i]===-2?-2:q.open?-1:sel[i])};
+ const p={page:PAGE,name,grade,setId:set.date,answers:set.questions.map((q,i)=>sel[i]===-2?-2:(q.open||q.num)?-1:sel[i])};
  const t={};for(const k in txt)if(sel[k]!==-2&&String(txt[k]).trim())t[k]=txt[k];
  if(Object.keys(t).length)p.texts=JSON.stringify(t);
  return p;
@@ -213,10 +219,12 @@ async function copyCode(){
 }
 
 /* ---------- 채점 카드 ---------- */
+// 사고력(숫자 입력) 채점: 쉼표·띄어쓰기·뒤에 붙은 단위는 무시하고 숫자 값이 같으면 정답
+const numEq=(a,b)=>{const x=String(a??'').replace(/[,\s]/g,'').match(/^-?\d+(\.\d+)?/);return !!x&&b!==undefined&&Number(x[0])===Number(b)};
 const textsOf=s=>{try{return s?JSON.parse(s):{}}catch(e){return{}}};
 function grade1(sub,qs){
  const t=textsOf(sub.texts);
- const rows=qs.map((q,i)=>{const dk=sub.answers[i]===-2;return{q,dk,open:!!q.open,ok:!dk&&!q.open&&sub.answers[i]===q.answer,mine:dk?'잘 몰라요':q.open?t[i]:(q.options||[])[sub.answers[i]]}});
+ const rows=qs.map((q,i)=>{const dk=sub.answers[i]===-2;return{q,dk,open:!!q.open,ok:!dk&&(q.num?numEq(t[i],q.ans):!q.open&&sub.answers[i]===q.answer),mine:dk?'잘 몰라요':(q.open||q.num)?t[i]:(q.options||[])[sub.answers[i]]}});
  const mc=rows.filter(r=>!r.open);
  return{rows,mc,tot:mc.filter(r=>r.ok).length,nopen:rows.length-mc.length,nk:rows.filter(r=>r.dk).length};
 }
@@ -226,7 +234,7 @@ function card(sub,qs,mode){
  if(!qs||sub.answers.length!==qs.length)return `<div class="res" style="--c:var(--no)"><h3>채점할 수 없는 제출</h3><div class="weak">${esc(sub.name)}</div></div>`;
  const g=grade1(sub,qs);
  const per=Object.keys(SUBJ).map(k=>{const r=g.mc.filter(x=>x.q.s===k);return r.length?`<span class="chip" style="--c:${SUBJ[k].c}">${SUBJ[k].n} ${r.filter(x=>x.ok).length}/${r.length}</span>`:''}).join('');
- const items=g.rows.map((r,i)=>`<div class="wrong"><b style="color:${r.dk?'var(--s)':r.open?'var(--e)':r.ok?'var(--ok)':'var(--no)'}">${r.dk?'몰라요':r.open?(st?'선생님 확인':'직접 확인'):r.ok?'정답':'오답'}</b> ${i+1}번 ${SUBJ[r.q.s].n} · ${esc(r.q.unit)}${r.q.script?`<button class="mini" data-s="${esc(r.q.script)}" onclick="hearText(this.dataset.s)">▶ 다시 듣기</button><div class="script">${esc(r.q.script)}</div>`:'<br>'}<span style="white-space:pre-line">${rich(r.q.q)}</span><br>${st?'내 답':'학생 답'}: ${r.open?esc(r.mine??'(미응답)'):rich(r.mine??'(미응답)')}${r.open?`<br>모범 답안: ${rich(r.q.model)}`:r.ok?'':`<br>정답: ${rich(r.q.options[r.q.answer])}`}<br><span class="weak">${rich(r.q.exp)}</span></div>`).join('');
+ const items=g.rows.map((r,i)=>`<div class="wrong"><b style="color:${r.dk?'var(--s)':r.open?'var(--e)':r.ok?'var(--ok)':'var(--no)'}">${r.dk?'몰라요':r.open?(st?'선생님 확인':'직접 확인'):r.ok?'정답':'오답'}</b> ${i+1}번 ${SUBJ[r.q.s].n} · ${esc(r.q.unit)}${r.q.script?`<button class="mini" data-s="${esc(r.q.script)}" onclick="hearText(this.dataset.s)">▶ 다시 듣기</button><div class="script">${esc(r.q.script)}</div>`:'<br>'}<span style="white-space:pre-line">${rich(r.q.q)}</span><br>${st?'내 답':'학생 답'}: ${r.open?esc(r.mine??'(미응답)'):rich(r.mine??'(미응답)')}${r.open?`<br>모범 답안: ${rich(r.q.model)}`:r.ok?'':`<br>정답: ${r.q.num?esc(r.q.ans):rich(r.q.options[r.q.answer])}`}<br><span class="weak">${rich(r.q.exp)}</span></div>`).join('');
  const info=`${sub.at?when(sub.at)+' 제출 · ':''}${sub.grade?sub.grade+'학년 · ':''}${fmt(sub.setId)} 문제${g.nk?` · 몰라요 ${g.nk}개`:''}${g.nopen?` · 서술형 ${g.nopen}문항은 ${st?'선생님이 확인해요':'직접 확인'}`:''}`;
  return `<div class="res" style="--c:var(--ink)"><h3><span>${esc(sub.name)}</span><span>정답 ${g.tot}/${g.mc.length}</span></h3>
  <div class="weak">${info}</div><div class="chips">${per}</div>
@@ -278,14 +286,14 @@ function teacherView(){
   const gs=subs.map(x=>grade1(x,s.questions));
   const n=s.questions.filter(q=>!q.open).length;
   const avg=gs.length?(gs.reduce((a,g)=>a+g.tot,0)/gs.length).toFixed(1):'-';
-  const wrongRate=s.questions.map((q,i)=>({i,q,rate:q.open||!subs.length?-1:subs.filter(x=>x.answers[i]!==q.answer).length/subs.length})).filter(x=>x.rate>0).sort((a,b)=>b.rate-a.rate).slice(0,3);
+  const wrongRate=s.questions.map((q,i)=>({i,q,rate:q.open||!gs.length?-1:gs.filter(g=>!g.rows[i].ok).length/gs.length})).filter(x=>x.rate>0).sort((a,b)=>b.rate-a.rate).slice(0,3);
   body=`<div class="box">
    <div class="row"><b>${T.tab}학년 · 제출 ${subs.length}명</b><span class="pill">평균 정답 ${avg}/${n}</span><span class="pill ${s.released?'on':''}">${s.released?'정답 공개 중':'정답 비공개'}</span></div>
    ${wrongRate.length?`<div class="weak" style="margin-top:8px">많이 틀린 문항: ${wrongRate.map(w=>`${w.i+1}번(${SUBJ[w.q.s].n} ${esc(w.q.unit)}) ${Math.round(w.rate*100)}%`).join(', ')}</div>`:''}
    <button class="rel ${s.released?'off':''}" onclick="release(${!s.released})">${s.released?'공개 취소 (다시 숨기기)':'OK — 학생에게 정답·해설 공개'}</button>
    <div class="weak" style="margin-top:6px">공개하면 ${fmt(d.date)} ${T.tab}학년을 낸 모든 학생이 자기 결과 화면에서 점수·정답·해설을 볼 수 있어요.</div>
   </div>
-  <details class="box"><summary>문제와 정답 미리보기 (${s.questions.length}문항)</summary>${s.questions.map((q,i)=>`<div class="wrong"><b>${i+1}번</b> ${SUBJ[q.s].n} · ${esc(q.unit)}${q.passage&&(i===0||s.questions[i-1].passage!==q.passage)?`<div class="psg">${esc(q.passage)}</div>`:'<br>'}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.script?`<button class="mini" data-s="${esc(q.script)}" onclick="hearText(this.dataset.s)">▶ 들어 보기</button><div class="script">${esc(q.script)}</div>`:''}<span style="white-space:pre-line">${rich(q.q)}</span><br>${q.open?`모범 답안: ${rich(q.model)}`:q.options.map((o,j)=>`<span style="${j===q.answer?'color:var(--ok);font-weight:700':''}">${'①②③④'[j]} ${rich(o)}</span>`).join('<br>')}<br><span class="weak">${rich(q.exp)}</span></div>`).join('')}</details>
+  <details class="box"><summary>문제와 정답 미리보기 (${s.questions.length}문항)</summary>${s.questions.map((q,i)=>`<div class="wrong"><b>${i+1}번</b> ${SUBJ[q.s].n} · ${esc(q.unit)}${q.passage&&(i===0||s.questions[i-1].passage!==q.passage)?`<div class="psg">${esc(q.passage)}</div>`:'<br>'}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.script?`<button class="mini" data-s="${esc(q.script)}" onclick="hearText(this.dataset.s)">▶ 들어 보기</button><div class="script">${esc(q.script)}</div>`:''}<span style="white-space:pre-line">${rich(q.q)}</span><br>${q.open?`모범 답안: ${rich(q.model)}`:q.num?`정답(숫자 입력): <b style="color:var(--ok)">${esc(q.ans)}</b>`:q.options.map((o,j)=>`<span style="${j===q.answer?'color:var(--ok);font-weight:700':''}">${'①②③④'[j]} ${rich(o)}</span>`).join('<br>')}<br><span class="weak">${rich(q.exp)}</span></div>`).join('')}</details>
   <h2 class="sec">제출한 학생</h2>
   ${subs.map(x=>card(x,s.questions,'list')).join('')||'<p class="lead">아직 제출한 학생이 없어요.</p>'}`;
  }
@@ -296,7 +304,7 @@ function teacherView(){
  <button class="home" onclick="teacherLoad(T.date)">새로 고침</button>
  <div style="margin-top:14px">${body}</div>
  <p class="weak">전송 실패로 제출 코드를 받았다면 <a href="#teacher" style="color:var(--e)">제출 코드 등록하기</a></p>
- ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="location.hash='#demo'">▶ 영어 듣기 소리 확인</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
+ ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="location.hash='#demo'">▶ 연습 문제 (듣기·사고력)</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
 }
 async function release(on){
  const btn=document.querySelector('.rel');btn.disabled=true;btn.textContent='처리 중…';
