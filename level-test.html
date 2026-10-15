@@ -166,9 +166,9 @@ function next(){TTS.stop();if(idx<set.questions.length-1){idx++;show();scrollTo(
 
 /* ---------- 영어 듣기 연습(저장 안 함): 소리·볼륨 확인용 ---------- */
 const DEMO=[
- {s:'l',unit:'연습 1 · 색깔',script:"A: What color is your bag?\nB: It's yellow.",q:'대화를 듣고, B의 가방 색깔을 고르세요.',options:['빨간색','노란색','파란색','초록색'],answer:1,exp:"B가 It's yellow.(노란색이야.)라고 했어요."},
- {s:'l',unit:'연습 2 · 개수',script:'A: How many apples do you have?\nB: I have five apples.',q:'대화를 듣고, B가 가진 사과는 몇 개인지 고르세요.',options:['3개','4개','5개','15개'],answer:2,exp:'B가 I have five apples.(사과가 다섯 개 있어.)라고 했어요. fifteen(15)과 헷갈리지 않게 끝까지 들어요.'},
- {s:'l',unit:'연습 3 · 한 일',script:'A: What did you do last Sunday?\nB: I went to the library and read books.\nA: That sounds fun.',q:'대화를 듣고, B가 지난 일요일에 한 일을 고르세요.',options:['도서관에서 책 읽기','공원에서 자전거 타기','집에서 숙제하기','영화 보기'],answer:0,exp:'B가 I went to the library and read books.(도서관에 가서 책을 읽었어.)라고 했어요.'}
+ {s:'l',unit:'연습 1 · 바꾼 말',script:"A: Can I have the red cap, please?\nB: Sure. Here you are.\nA: Oh, wait. Not the red one. I want the blue one.\nB: Okay. Here is the blue cap.",q:'대화를 듣고, A가 마지막에 사려는 모자의 색깔을 고르세요.',options:['빨간색','파란색','노란색','초록색'],answer:1,exp:"처음에는 red cap(빨간 모자)을 달라고 했지만, Not the red one. I want the blue one.(빨간 거 말고 파란 걸로 할게요.)이라고 바꿨어요."},
+ {s:'l',unit:'연습 2 · 가격 더하기',script:"A: How much is this pencil?\nB: It's two dollars.\nA: And how much is the eraser?\nB: It's one dollar.\nA: I'll take both, please.",q:'대화를 듣고, A가 내야 할 돈은 모두 얼마인지 고르세요.',options:['1달러','2달러','3달러','4달러'],answer:2,exp:"연필은 two dollars(2달러), 지우개는 one dollar(1달러)이고, I'll take both.(둘 다 살게요.)라고 했으니 2 + 1 = 3달러예요."},
+ {s:'l',unit:'연습 3 · 장소 추론',script:"A: Excuse me. I'm looking for a book about dinosaurs.\nB: Go to the second floor. The science books are next to the window.\nA: Thank you. Can I borrow three books?\nB: Yes, you can borrow five books for two weeks.",q:'대화를 듣고, 두 사람이 대화하는 장소로 알맞은 곳을 고르세요.',options:['도서관','서점','박물관','학교 식당'],answer:0,exp:"borrow(빌리다), you can borrow five books for two weeks.(책을 2주 동안 5권 빌릴 수 있어요.)라는 말로 보아 책을 빌려주는 도서관이에요. 서점은 책을 사는 곳이라 답이 아니에요."}
 ];
 function demo(){
  set={demo:true,date:'',grade:0,questions:DEMO.map(({answer,exp,...q})=>q)};idx=0;sel=[];txt={};
