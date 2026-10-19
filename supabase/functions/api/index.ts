@@ -22,6 +22,8 @@ const json = (body: unknown, status = 200) =>
   });
 const kst = (plusDays = 0) => new Date(Date.now() + 9 * 3600e3 + plusDays * 86400e3).toISOString().slice(0, 10);
 const todayKST = () => kst(0);
+// 오늘(한국 시간)까지 최근 7일, 오래된 날부터
+const week = () => [-6, -5, -4, -3, -2, -1, 0].map((d) => kst(d));
 
 let keyHash: string | null = null;
 async function sha256(s: string) {
@@ -155,6 +157,24 @@ Deno.serve(async (req) => {
       return json({ ...d, locked: false, questions: set.questions });
     }
 
+    // 학생 시작 화면: 최근 7일(오늘 포함) 날짜별 문제 유무·제출 여부
+    if (req.method === "GET" && route === "history") {
+      const grade = Number(p.get("grade"));
+      const name = (p.get("name") ?? "").trim();
+      if (!GRADES.includes(grade)) return json({ error: "bad grade" }, 400);
+      if (!name || name.length > 20) return json({ error: "bad name" }, 400);
+      const days = week();
+      const [{ data: srows, error: se }, { data: urows, error: ue }] = await Promise.all([
+        sb.from("sets").select("date").eq("grade", grade).in("date", days),
+        sb.from("submissions").select("set_id").eq("page", "level").eq("grade", grade).eq("name", name).in("set_id", days),
+      ]);
+      if (se) throw se;
+      if (ue) throw ue;
+      const has = new Set((srows ?? []).map((r: { date: string }) => r.date));
+      const done = new Set((urows ?? []).map((r: { set_id: string }) => r.set_id));
+      return json({ today: todayKST(), days: days.map((d) => ({ date: d, set: has.has(d), done: done.has(d) })) });
+    }
+
     // 교사 화면: 날짜 목록(2주 뒤까지), 기본은 오늘 이하 최신 날짜
     if (req.method === "GET" && route === "teacher") {
       if (!(await isTeacher(p.get("key")))) return json({ error: "forbidden" }, 403);
@@ -171,7 +191,20 @@ Deno.serve(async (req) => {
       const { data: subs, error: ue } = await sb.from("submissions").select("*").eq("page", "level").eq("set_id", date)
         .order("created_at", { ascending: false }).limit(300);
       if (ue) throw ue;
-      return json({ dates, date, sets: (srows as SetRow[]).map(setOut), subs: (subs as SubRow[]).map(subOut) });
+      // 최근 7일 제출 현황표(학생 × 날짜)
+      const days = week();
+      const [{ data: wsets, error: we1 }, { data: wsubs, error: we2 }] = await Promise.all([
+        sb.from("sets").select("date,grade").in("date", days),
+        sb.from("submissions").select("name,grade,set_id").eq("page", "level").in("set_id", days).limit(2000),
+      ]);
+      if (we1) throw we1;
+      if (we2) throw we2;
+      const weekOut = {
+        today: todayKST(), days,
+        sets: (wsets ?? []).map((r: { date: string; grade: number }) => ({ date: r.date, grade: r.grade })),
+        subs: (wsubs ?? []).map((r: { name: string; grade: number; set_id: string }) => ({ name: r.name, grade: r.grade, date: r.set_id })),
+      };
+      return json({ dates, date, sets: (srows as SetRow[]).map(setOut), subs: (subs as SubRow[]).map(subOut), week: weekOut });
     }
 
     if (req.method === "POST" && route === "release") {

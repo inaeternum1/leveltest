@@ -69,13 +69,31 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 .pill.on{background:color-mix(in srgb,var(--ok) 20%,var(--card));color:var(--ok)}
 .rel{border:0;border-radius:14px;padding:14px;width:100%;font:inherit;font-family:'Jua',sans-serif;font-size:1.1rem;cursor:pointer;margin-top:10px;background:var(--ok);color:#fff}
 .rel.off{background:none;border:2px solid var(--no);color:var(--no)}
+/* 최근 7일 제출 O/X */
+.wk{background:var(--card);border-radius:18px;padding:12px 10px 10px;margin:4px 0 10px}
+.wk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 4px 8px;font-size:.92rem;color:var(--sub)}
+.wk-h b{font-family:'Jua',sans-serif;font-weight:400;color:var(--ink);font-size:1.05rem}
+.wk-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.wk-c{text-align:center;border-radius:10px;padding:5px 0 4px;background:var(--bg);line-height:1.2}
+.wk-c.today{outline:2px solid var(--e);outline-offset:-2px}
+.wk-d{display:block;font-size:.72rem;color:var(--sub);white-space:nowrap}
+.wk-m{display:block;font-family:'Jua',sans-serif;font-size:1.35rem;margin-top:2px}
+.mk-o{color:var(--ok)}.mk-x{color:var(--no)}.mk-n,.mk-w{color:var(--sub)}
+.mk-w{font-family:'Gowun Dodum',sans-serif;font-size:.8rem!important;padding:5px 0 3px}
+.wkt{width:100%;border-collapse:collapse;font-size:.85rem;table-layout:fixed}
+.wkt th,.wkt td{text-align:center;padding:5px 2px;border-bottom:1px solid var(--line)}
+.wkt th{font-weight:400;color:var(--sub);font-size:.72rem;line-height:1.2}
+.wkt th:first-child,.wkt td:first-child{text-align:left;width:5.2em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wkt td{font-family:'Jua',sans-serif;font-size:1.05rem}
+.wkt td:first-child{font-family:inherit;font-size:.9rem}
+.wkt .today{background:color-mix(in srgb,var(--e) 10%,transparent)}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
 // 새 버전 자동 반영: 폰이 예전 화면을 저장해 두었으면 version.txt와 비교해 한 번만 새로 불러온다.
-const BUILD='202610151355';
+const BUILD='202610191640';
 (async()=>{try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
  if(v&&v!==BUILD&&sessionStorage.getItem('lt_reloaded')!==v){sessionStorage.setItem('lt_reloaded',v);location.replace(location.pathname+'?v='+v+location.hash)}}catch(e){}})();
 const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
@@ -118,20 +136,51 @@ const postJSON=async(u,b)=>{const r=await fetch(u,{method:'POST',headers:{'Conte
 
 let name='',grade=0,set=null,idx=0,sel=[],txt={};
 
+/* ---------- 최근 7일 제출 O/X ---------- */
+const WD='일월화수목금토';
+const md=d=>`${+d.slice(5,7)}/${+d.slice(8,10)}`;
+const wd=d=>WD[new Date(Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10))).getUTCDay()];
+// O = 제출, X = 문제가 있었는데 안 냄, – = 그날 문제 없음, 오늘 아직 안 냈으면 '아직'
+const mark=(has,done,isToday)=>done?['O','o']:!has?['–','n']:isToday?['아직','w']:['X','x'];
+let wkSeq=0;
+async function loadWeek(){
+ const box=document.getElementById('wk');if(!box)return;
+ const nm=(document.getElementById('nm')?.value||name||'').trim();
+ if(!nm||!grade){box.innerHTML='';return}
+ const my=++wkSeq;
+ let r;try{r=await getJSON(`${API}/history?grade=${grade}&name=${encodeURIComponent(nm)}`)}catch(e){r=null}
+ if(my!==wkSeq||!document.getElementById('wk'))return;
+ if(!r||!r.ok||!r.j||!r.j.days){box.innerHTML='';return}
+ const days=r.j.days,n=days.filter(x=>x.done).length,due=days.filter(x=>x.set).length;
+ box.innerHTML=`<div class="wk" aria-label="최근 7일 제출 기록"><div class="wk-h"><b>${esc(nm)} · ${grade}학년 최근 7일</b><span>${n}/${due}일 제출</span></div>
+ <div class="wk-g">${days.map(x=>{const t=x.date===r.j.today,[m,c]=mark(x.set,x.done,t);return`<div class="wk-c${t?' today':''}"><span class="wk-d">${md(x.date)}<br>${wd(x.date)}</span><span class="wk-m mk-${c}" aria-label="${c==='o'?'제출':c==='x'?'안 냄':c==='w'?'아직 안 냄':'문제 없음'}">${m}</span></div>`}).join('')}</div></div>`;
+}
+function weekTable(w,g){
+ if(!w||!w.days)return'';
+ const has=new Set(w.sets.filter(x=>x.grade===g).map(x=>x.date));
+ const done=new Set(w.subs.filter(x=>x.grade===g).map(x=>x.name+'\u0000'+x.date));
+ const names=[...new Set(w.subs.filter(x=>x.grade===g).map(x=>x.name))].sort((a,b)=>a.localeCompare(b,'ko'));
+ const head=`<tr><th>이름</th>${w.days.map(d=>`<th class="${d===w.today?'today':''}">${md(d)}<br>${wd(d)}</th>`).join('')}</tr>`;
+ const rows=names.map(nm=>`<tr><td title="${esc(nm)}">${esc(nm)}</td>${w.days.map(d=>{const[m,c]=mark(has.has(d),done.has(nm+'\u0000'+d),d===w.today);return`<td class="mk-${c}${d===w.today?' today':''}">${m}</td>`}).join('')}</tr>`).join('');
+ return`<div class="box"><div class="row" style="justify-content:space-between"><b>${g}학년 최근 7일 제출</b><span class="weak">O 제출 · X 안 냄 · – 문제 없음</span></div>
+ ${names.length?`<table class="wkt" style="margin-top:8px">${head}${rows}</table>`:'<p class="weak" style="margin:8px 0 0">최근 7일 동안 제출한 학생이 없어요.</p>'}</div>`;
+}
+
 /* ---------- 학생: 시작 화면 ---------- */
 function home(){
  name=store.get('lt_name','');grade=store.get('lt_grade',0);
  const mine=store.get('lt_mine',[]).slice(0,10);
- $.innerHTML=`<h1 class="jua">오늘의<br>레벨 테스트</h1>
- <p class="lead">국어·영어·영어 듣기·수학·과학 문제예요. 영어 듣기는 소리를 켜거나 이어폰을 끼고 풀어요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
- <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(name)}">
+ $.innerHTML=`<div id="wk"></div><h1 class="jua">오늘의<br>레벨 테스트</h1>
+ <p class="lead">국어·영어·영어 듣기·수학·과학 13문제예요. 영어 듣기는 소리를 켜거나 이어폰을 끼고 풀어요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
+ <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(name)}" onchange="loadWeek()">
  <label>학년</label><div class="grades">${[4,5].map(g=>`<button class="gbtn ${grade===g?'pick':''}" onclick="pickGrade(${g})">${g}학년</button>`).join('')}</div>
  <button class="all" onclick="start()">시작하기</button>
  <button class="home" onclick="location.hash='#demo'">▶ 연습 문제: 영어 듣기·사고력 수학 (저장 안 돼요)</button>
  <p id="msg" class="lead" role="status" style="margin-top:10px"></p>
  ${mine.length?`<h2 class="sec">내 결과</h2><div class="box mine"><ul style="margin:0;padding-left:18px">${mine.map(m=>`<li><a href="#r=${m.rid}">${fmt(m.date)} ${m.grade}학년 · ${esc(m.name)}</a></li>`).join('')}</ul><div class="weak" style="margin-top:6px">선생님이 확인하면 정답과 해설이 열려요.</div></div>`:''}`;
+ loadWeek();
 }
-function pickGrade(g){grade=g;store.set('lt_grade',g);document.querySelectorAll('.gbtn').forEach(b=>b.classList.toggle('pick',b.textContent===g+'학년'))}
+function pickGrade(g){grade=g;store.set('lt_grade',g);document.querySelectorAll('.gbtn').forEach(b=>b.classList.toggle('pick',b.textContent===g+'학년'));loadWeek()}
 async function start(){
  const msg=document.getElementById('msg');
  name=document.getElementById('nm').value.trim();
@@ -306,7 +355,7 @@ function teacherView(){
  <label for="dt">날짜</label><select id="dt" onchange="teacherLoad(this.value)">${d.dates.map(x=>`<option value="${x}" ${x===d.date?'selected':''}>${fmt(x)}</option>`).join('')}</select>
  <div class="grades" style="margin-top:12px">${[4,5].map(g=>`<button class="gbtn ${T.tab===g?'pick':''}" onclick="T.tab=${g};teacherView()">${g}학년 (${d.subs.filter(x=>x.grade===g).length})</button>`).join('')}</div>
  <button class="home" onclick="teacherLoad(T.date)">새로 고침</button>
- <div style="margin-top:14px">${body}</div>
+ <div style="margin-top:14px">${weekTable(d.week,T.tab)}${body}</div>
  <p class="weak">전송 실패로 제출 코드를 받았다면 <a href="#teacher" style="color:var(--e)">제출 코드 등록하기</a></p>
  ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="location.hash='#demo'">▶ 연습 문제 (듣기·사고력)</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
 }
