@@ -87,13 +87,36 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 .wkt td{font-family:'Jua',sans-serif;font-size:1.05rem}
 .wkt td:first-child{font-family:inherit;font-size:.9rem}
 .wkt .today{background:color-mix(in srgb,var(--e) 10%,transparent)}
+/* 스도쿠 */
+.sdk{display:grid;grid-template-columns:repeat(9,1fr);width:100%;max-width:400px;margin:8px auto 10px;border:2.5px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--card);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.sc{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--card);color:var(--e);font:inherit;font-family:'Jua',sans-serif;font-size:clamp(1.05rem,5.4vw,1.5rem);padding:0;cursor:pointer;position:relative;min-width:0}
+.sc.c3{border-right:2px solid var(--ink)}.sc.r3{border-bottom:2px solid var(--ink)}
+.sc.c9{border-right:0}.sc.r9{border-bottom:0}
+.sc.gv{color:var(--ink);cursor:default}
+.sc.pe{background:color-mix(in srgb,var(--e) 7%,var(--card))}
+.sc.sm{background:color-mix(in srgb,var(--e) 18%,var(--card))}
+.sc.on{background:color-mix(in srgb,var(--e) 32%,var(--card))}
+.sc.bad{color:var(--no);background:color-mix(in srgb,var(--no) 14%,var(--card))}
+.sc .nt{position:absolute;inset:1px;display:grid;grid-template-columns:repeat(3,1fr);font-family:'Gowun Dodum',sans-serif;font-size:clamp(.45rem,2.1vw,.62rem);line-height:1;color:var(--sub)}
+.sc .nt i{font-style:normal;display:flex;align-items:center;justify-content:center}
+.pad{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;max-width:400px;margin:0 auto}
+.pad button{padding:10px 0;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-family:'Jua',sans-serif;font-size:1.25rem;cursor:pointer;min-width:0}
+.pad button.dn{opacity:.35}
+.pad2{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:400px;margin:6px auto 0}
+.pad2 button{padding:11px 4px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.pad2 button.on{border-color:var(--m);background:color-mix(in srgb,var(--m) 16%,var(--card))}
+.sdk-st{text-align:center;color:var(--sub);font-size:.92rem;margin:8px 0 0;min-height:1.4em}
+.sdm{display:inline-grid;grid-template-columns:repeat(9,1.35em);border:2px solid var(--ink);margin:6px 0;font-size:.85rem;line-height:1.35em;text-align:center;vertical-align:top}
+.sdm span{border-right:1px solid var(--line);border-bottom:1px solid var(--line);height:1.35em}
+.sdm .c3{border-right:2px solid var(--ink)}.sdm .r3{border-bottom:2px solid var(--ink)}.sdm .c9{border-right:0}.sdm .r9{border-bottom:0}
+.sdm .g{color:var(--sub)}.sdm .ok{color:var(--ok);font-weight:700}.sdm .x{color:var(--no);font-weight:700;background:color-mix(in srgb,var(--no) 14%,transparent)}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
 // 새 버전 자동 반영: 폰이 예전 화면을 저장해 두었으면 version.txt와 비교해 한 번만 새로 불러온다.
-const BUILD='202610191640';
+const BUILD='202610221720';
 (async()=>{try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
  if(v&&v!==BUILD&&sessionStorage.getItem('lt_reloaded')!==v){sessionStorage.setItem('lt_reloaded',v);location.replace(location.pathname+'?v='+v+location.hash)}}catch(e){}})();
 const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
@@ -171,11 +194,11 @@ function home(){
  name=store.get('lt_name','');grade=store.get('lt_grade',0);
  const mine=store.get('lt_mine',[]).slice(0,10);
  $.innerHTML=`<div id="wk"></div><h1 class="jua">오늘의<br>레벨 테스트</h1>
- <p class="lead">국어·영어·영어 듣기·수학·과학 13문제예요. 영어 듣기는 소리를 켜거나 이어폰을 끼고 풀어요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
+ <p class="lead">국어·영어·영어 듣기·수학(사고력·스도쿠)·과학 14문제예요. 영어 듣기는 소리를 켜거나 이어폰을 끼고 풀어요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
  <label for="nm">이름</label><input id="nm" maxlength="20" placeholder="이름을 입력하세요" autocomplete="off" value="${esc(name)}" onchange="loadWeek()">
  <label>학년</label><div class="grades">${[4,5].map(g=>`<button class="gbtn ${grade===g?'pick':''}" onclick="pickGrade(${g})">${g}학년</button>`).join('')}</div>
  <button class="all" onclick="start()">시작하기</button>
- <button class="home" onclick="location.hash='#demo'">▶ 연습 문제: 영어 듣기·사고력 수학 (저장 안 돼요)</button>
+ <button class="home" onclick="location.hash='#demo'">▶ 연습 문제: 영어 듣기·사고력 수학·스도쿠 (저장 안 돼요)</button>
  <p id="msg" class="lead" role="status" style="margin-top:10px"></p>
  ${mine.length?`<h2 class="sec">내 결과</h2><div class="box mine"><ul style="margin:0;padding-left:18px">${mine.map(m=>`<li><a href="#r=${m.rid}">${fmt(m.date)} ${m.grade}학년 · ${esc(m.name)}</a></li>`).join('')}</ul><div class="weak" style="margin-top:6px">선생님이 확인하면 정답과 해설이 열려요.</div></div>`:''}`;
  loadWeek();
@@ -201,11 +224,79 @@ async function start(){
  }
  idx=0;sel=[];txt={};show();
 }
-function ready(){const q=set.questions[idx];if(sel[idx]===-2)return true;return (q.open||q.num)?(txt[idx]||'').trim().length>0:sel[idx]!==undefined}
+function ready(){const q=set.questions[idx];if(sel[idx]===-2)return true;if(q.sudoku)return sdkLeft(q,txt[idx]).mine>0;return (q.open||q.num)?(txt[idx]||'').trim().length>0:sel[idx]!==undefined}
+
+/* ---------- 스도쿠: 판을 직접 채우기. txt[idx]에 81자(0=빈칸), 메모는 이 폰에만 ---------- */
+const SD={cell:-1,memo:false,notes:{},warned:false};
+const sdkLeft=(q,g)=>{g=g||q.sudoku;let left=0,mine=0;for(let i=0;i<81;i++){if(q.sudoku[i]!=='0')continue;if(g[i]==='0')left++;else mine++}return{left,mine}};
+const sdkPeers=i=>{const r=Math.floor(i/9),c=i%9,br=r-r%3,bc=c-c%3,s=new Set();for(let k=0;k<9;k++){s.add(r*9+k);s.add(k*9+c);s.add((br+Math.floor(k/3))*9+bc+k%3)}s.delete(i);return s};
+const SDK_PEERS=[...Array(81)].map((_,i)=>sdkPeers(i));
+const sdkKey=()=>set&&!set.demo?`lt_sdk_${set.date}_${grade}`:'';
+function sdkInit(q){
+ if(txt[idx]!==undefined&&txt[idx].length===81)return;
+ const k=sdkKey(),d=k&&store.get(k,null);
+ if(d&&d.p===q.sudoku&&typeof d.g==='string'&&d.g.length===81){txt[idx]=d.g;SD.notes[idx]=d.n||{}}else{txt[idx]=q.sudoku;SD.notes[idx]={}}
+}
+function sdkSave(){const k=sdkKey();if(k)store.set(k,{p:set.questions[idx].sudoku,g:txt[idx],n:SD.notes[idx]||{}})}
+function sdkBody(q){
+ sdkInit(q);
+ return `<div class="sdk" id="sdk" role="grid" aria-label="스도쿠 판"></div>
+ <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button onclick="sdkPut(${d})" aria-label="${d}">${d}</button>`).join('')}</div>
+ <div class="pad2"><button id="memo" onclick="SD.memo=!SD.memo;sdkDraw()" aria-pressed="false">✏️ 메모</button><button onclick="sdkPut(0)">지우기</button></div>
+ <p class="sdk-st" id="sdk-st" role="status"></p>
+ <p class="weak" style="margin:4px 0 0">칸을 누르고 아래 숫자를 눌러요. <b>메모</b>를 켜면 들어갈 수 있는 숫자를 작게 적어 둘 수 있어요. 같은 줄·상자에 같은 숫자가 있으면 빨갛게 보여요. 풀던 판은 이 폰에 저장돼요.</p>`;
+}
+function sdkDraw(){
+ const el=document.getElementById('sdk');if(!el)return;
+ const q=set.questions[idx],g=txt[idx],nt=SD.notes[idx]||(SD.notes[idx]={}),cur=SD.cell;
+ const curD=cur>=0&&g[cur]!=='0'?g[cur]:'';
+ const peers=cur>=0?SDK_PEERS[cur]:new Set();
+ el.innerHTML=[...Array(81)].map((_,i)=>{
+  const r=Math.floor(i/9),c=i%9,v=g[i],gv=q.sudoku[i]!=='0';
+  const bad=v!=='0'&&[...SDK_PEERS[i]].some(p=>g[p]===v);
+  const cls=['sc',c%3===2&&c<8?'c3':'',c===8?'c9':'',r%3===2&&r<8?'r3':'',r===8?'r9':'',gv?'gv':'',i===cur?'on':curD&&v===curD?'sm':peers.has(i)?'pe':'',bad&&!gv?'bad':''].filter(Boolean).join(' ');
+  const inner=v!=='0'?v:(nt[i]&&nt[i].length?`<span class="nt">${[1,2,3,4,5,6,7,8,9].map(d=>`<i>${nt[i].includes(d)?d:''}</i>`).join('')}</span>`:'');
+  return `<button class="${cls}" onclick="sdkSel(${i})" aria-label="${r+1}행 ${c+1}열 ${v!=='0'?v:'빈칸'}${gv?' (처음부터 있던 숫자)':''}">${inner}</button>`}).join('');
+ const cnt={};for(const ch of g)cnt[ch]=(cnt[ch]||0)+1;
+ document.querySelectorAll('#pad button').forEach((b,k)=>b.classList.toggle('dn',(cnt[String(k+1)]||0)>=9));
+ const m=document.getElementById('memo');m.classList.toggle('on',SD.memo);m.setAttribute('aria-pressed',SD.memo);m.textContent=SD.memo?'✏️ 메모 켜짐':'✏️ 메모';
+ const {left}=sdkLeft(q,g);
+ const conflict=[...Array(81)].some((_,i)=>g[i]!=='0'&&[...SDK_PEERS[i]].some(p=>g[p]===g[i]));
+ const st=document.getElementById('sdk-st');
+ if(!SD.warned)st.textContent=left?`빈칸 ${left}개 남았어요${conflict?' · 빨간 숫자를 다시 살펴보세요':''}`:conflict?'다 채웠지만 빨간 숫자가 있어요. 다시 살펴보세요.':'다 채웠어요! 제출 전에 한 번 더 확인해 보세요.';
+ const nx=document.querySelector('.next');if(nx)nx.disabled=!ready();
+}
+function sdkSel(i){if(set.questions[idx].sudoku[i]!=='0'){SD.cell=i;sdkDraw();return}SD.cell=i;sdkDraw()}
+function sdkPut(d){
+ const q=set.questions[idx],i=SD.cell;
+ if(i<0){document.getElementById('sdk-st').textContent='먼저 빈칸을 눌러 골라요.';return}
+ if(q.sudoku[i]!=='0')return;
+ const g=txt[idx].split(''),nt=SD.notes[idx]||(SD.notes[idx]={});
+ if(d===0){if(g[i]!=='0')g[i]='0';else delete nt[i]}
+ else if(SD.memo&&g[i]==='0'){const a=nt[i]||[];nt[i]=a.includes(d)?a.filter(x=>x!==d):[...a,d].sort()}
+ else{g[i]=g[i]===String(d)?'0':String(d);if(g[i]!=='0')SDK_PEERS[i].forEach(p=>{if(nt[p])nt[p]=nt[p].filter(x=>x!==d)})}
+ txt[idx]=g.join('');SD.warned=false;
+ if(sel[idx]===-2){delete sel[idx];document.querySelector('.dk')?.classList.remove('pick')}
+ sdkSave();sdkDraw();
+}
+document.addEventListener('keydown',e=>{
+ if(!document.getElementById('sdk')||e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+ if(/^[1-9]$/.test(e.key)){sdkPut(+e.key);e.preventDefault()}
+ else if(e.key==='Backspace'||e.key==='Delete'||e.key==='0'){sdkPut(0);e.preventDefault()}
+ else if(SD.cell>=0&&/^Arrow/.test(e.key)){const r=Math.floor(SD.cell/9),c=SD.cell%9,m={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[e.key];SD.cell=((r+m[0]+9)%9)*9+(c+m[1]+9)%9;sdkDraw();e.preventDefault()}
+});
+// 결과·교사 화면용 작은 판: 처음 숫자(회색), 맞은 칸(초록), 틀린 칸(빨강)
+function sdkMini(p,g,sol){
+ g=g&&g.length===81?g:p;
+ return `<div class="sdm" role="img" aria-label="스도쿠 판">${[...Array(81)].map((_,i)=>{const r=Math.floor(i/9),c=i%9,v=g[i],gv=p[i]!=='0';
+  const k=gv?'g':v==='0'?'':!sol?'':v===sol[i]?'ok':'x';
+  return `<span class="${[c%3===2&&c<8?'c3':'',c===8?'c9':'',r%3===2&&r<8?'r3':'',r===8?'r9':'',k].filter(Boolean).join(' ')}">${v==='0'?'':v}</span>`}).join('')}</div>`;
+}
+function sdkScore(q,g){let blank=0,ok=0;for(let i=0;i<81;i++)if(q.sudoku[i]==='0'){blank++;if(g&&g[i]===q.sol[i])ok++}return{blank,ok}}
 function show(){
  const qs=set.questions,q=qs[idx],c=SUBJ[q.s].c,last=idx===qs.length-1;
  const dk=`<button class="opt dk ${sel[idx]===-2?'pick':''}" onclick="pick(-2)">잘 몰라요 (찍지 않고 넘기기)</button>`;
- const body=(q.num?`<input id="ans" class="numin" inputmode="decimal" autocomplete="off" maxlength="12" oninput="typed(this.value)" placeholder="답을 숫자로 쓰세요" value="${esc(txt[idx]||'')}"><p class="weak" style="margin:6px 0 0">개, cm 같은 단위는 빼고 숫자만 써요. 종이에 풀어 봐도 좋아요.</p>`
+ const body=(q.sudoku?sdkBody(q):q.num?`<input id="ans" class="numin" inputmode="decimal" autocomplete="off" maxlength="12" oninput="typed(this.value)" placeholder="답을 숫자로 쓰세요" value="${esc(txt[idx]||'')}"><p class="weak" style="margin:6px 0 0">개, cm 같은 단위는 빼고 숫자만 써요. 종이에 풀어 봐도 좋아요.</p>`
   :q.open?`<textarea id="ans" rows="4" maxlength="300" oninput="typed(this.value)" placeholder="여기에 쓰세요">${esc(txt[idx]||'')}</textarea>`
   :q.options.map((o,i)=>`<button class="opt ${sel[idx]===i?'pick':''}" onclick="pick(${i})">${rich(o)}</button>`).join(''))+dk;
  $.innerHTML=`<div class="meta"><span>${SUBJ[q.s].n} · ${set.demo?'연습':grade+'학년'}</span><span>${idx+1} / ${qs.length}</span></div>
@@ -213,11 +304,17 @@ function show(){
  <div class="q" style="--c:${c}"><span class="tag">${esc(q.unit)}</span>${q.passage?`<div class="psg">${esc(q.passage)}</div>`:''}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.s==='l'&&q.script?`<div class="listen"><button onclick="hear(false)">▶ 듣기</button><button class="slow" onclick="hear(true)">천천히</button></div><p id="tts-msg" class="weak" role="status" style="margin:-6px 0 8px">${TTS.ok()?'여러 번 들어도 괜찮아요.':'이 기기에서는 소리를 낼 수 없어요. 선생님께 말씀드려 주세요.'}</p>`:''}<h2>${rich(q.q)}</h2>${body}
  <button class="next" style="--c:${c}" ${ready()?'':'disabled'} onclick="next()">${last?'제출하기':'다음 문제'}</button>
  ${idx>0?`<button class="home" onclick="prev()">이전 문제</button>`:''}</div>`;
+ if(q.sudoku)sdkDraw();
 }
 function typed(v){txt[idx]=v;if(v.trim()&&sel[idx]===-2){delete sel[idx];document.querySelector('.dk').classList.remove('pick')}document.querySelector('.next').disabled=!ready()}
-function pick(i){sel[idx]=i;if(i===-2)delete txt[idx];show()}
-function prev(){TTS.stop();if(idx>0){idx--;show();scrollTo(0,0)}}
-function next(){TTS.stop();if(idx<set.questions.length-1){idx++;show();scrollTo(0,0)}else if(set.demo)demoDone();else done()}
+function pick(i){sel[idx]=i;if(i===-2&&!set.questions[idx].sudoku)delete txt[idx];show()}
+function prev(){TTS.stop();SD.cell=-1;SD.warned=false;if(idx>0){idx--;show();scrollTo(0,0)}}
+function next(){
+ TTS.stop();const q=set.questions[idx];
+ // 스도쿠를 덜 채웠으면 한 번 알려 주고, 한 번 더 누르면 넘어간다
+ if(q.sudoku&&sel[idx]!==-2&&!SD.warned){const {left}=sdkLeft(q,txt[idx]);if(left){SD.warned=true;document.getElementById('sdk-st').innerHTML=`<b style="color:var(--no)">아직 빈칸이 ${left}개 있어요.</b> 이대로 넘어가려면 한 번 더 누르세요.`;return}}
+ SD.cell=-1;SD.warned=false;
+ if(idx<set.questions.length-1){idx++;show();scrollTo(0,0)}else if(set.demo)demoDone();else done()}
 
 /* ---------- 영어 듣기 연습(저장 안 함): 소리·볼륨 확인용 ---------- */
 const DEMO=[
@@ -226,22 +323,23 @@ const DEMO=[
  {s:'l',unit:'연습 3 · 장소 추론',script:"A: Excuse me. I'm looking for a book about dinosaurs.\nB: Go to the second floor. The science books are next to the window.\nA: Thank you. Can I borrow three books?\nB: Yes, you can borrow five books for two weeks.",q:'대화를 듣고, 두 사람이 대화하는 장소로 알맞은 곳을 고르세요.',options:['도서관','서점','박물관','학교 식당'],answer:0,exp:"borrow(빌리다), you can borrow five books for two weeks.(책을 2주 동안 5권 빌릴 수 있어요.)라는 말로 보아 책을 빌려주는 도서관이에요. 서점은 책을 사는 곳이라 답이 아니에요."}
 ,
  {s:'m',unit:'사고력 · 경우 따지기',num:true,ans:'9',q:'1부터 100까지의 자연수 중에서 각 자리 숫자를 더하면 10이 되는 수는 모두 몇 개인가요?\n(예: 37은 3 + 7 = 10)',exp:'한 자리 수는 가장 커도 9라서 안 돼요. 두 자리 수는 십의 자리가 1~9일 때 일의 자리가 9, 8, …, 1로 하나씩 정해져서 19, 28, 37, 46, 55, 64, 73, 82, 91로 9개예요. 100은 1 + 0 + 0 = 1이에요.'},
- {s:'m',unit:'사고력 · 규칙 찾기',num:true,ans:'46',q:'성냥개비로 정사각형을 옆으로 이어 붙여 만들고 있어요. 정사각형 1개는 4개, 2개는 7개, 3개는 10개가 필요해요. 정사각형 15개를 만들려면 성냥개비는 모두 몇 개 필요한가요?',exp:'첫 정사각형에 4개가 들고, 하나 붙일 때마다 옆 변을 같이 써서 3개씩 늘어나요. 4 + 3 × 14 = 46(개)예요. 3 × 15 + 1로 생각해도 돼요.'}
+ {s:'m',unit:'사고력 · 규칙 찾기',num:true,ans:'46',q:'성냥개비로 정사각형을 옆으로 이어 붙여 만들고 있어요. 정사각형 1개는 4개, 2개는 7개, 3개는 10개가 필요해요. 정사각형 15개를 만들려면 성냥개비는 모두 몇 개 필요한가요?',exp:'첫 정사각형에 4개가 들고, 하나 붙일 때마다 옆 변을 같이 써서 3개씩 늘어나요. 4 + 3 × 14 = 46(개)예요. 3 × 15 + 1로 생각해도 돼요.'},
+ {s:'m',unit:'스도쿠',sudoku:'908570000006080500070400080002000703700000008304000200020007030009030400000024609',sol:'918576324246381597573492186852649713761253948394718265425967831689135472137824659',q:'가로줄, 세로줄, 굵은 선으로 나뉜 상자(3×3) 안에 1부터 9까지의 숫자가 한 번씩만 들어가도록 빈칸을 모두 채우세요.',exp:'찍지 않고 생각만으로 풀 수 있는 문제예요. 한 줄이나 한 상자에서 어떤 숫자가 들어갈 자리가 한 곳뿐인 칸, 또는 들어갈 수 있는 숫자가 하나뿐인 칸부터 채워 나가요.'}
 ];
 function demo(){
- set={demo:true,date:'',grade:0,questions:DEMO.map(({answer,exp,...q})=>q)};idx=0;sel=[];txt={};
+ set={demo:true,date:'',grade:0,questions:DEMO.map(({answer,exp,sol,...q})=>q)};idx=0;sel=[];txt={};
  show();
- $.insertAdjacentHTML('afterbegin',`<p class="lead" style="margin:0 0 10px">연습 문제예요. 점수는 저장되지 않아요. 영어 듣기 3문제는 <b>▶ 듣기</b>를 눌러 소리를 확인하고, 마지막 2문제는 생각을 많이 해야 하는 사고력 수학이에요.</p>`);
+ $.insertAdjacentHTML('afterbegin',`<p class="lead" style="margin:0 0 10px">연습 문제예요. 점수는 저장되지 않아요. 영어 듣기 3문제는 <b>▶ 듣기</b>를 눌러 소리를 확인하고, 그다음 2문제는 생각을 많이 해야 하는 사고력 수학, 마지막은 스도쿠예요.</p>`);
 }
 function demoDone(){
- const t={};DEMO.forEach((q,i)=>{if(q.num&&sel[i]!==-2&&txt[i])t[i]=txt[i]});
- const sub={name:name||'연습',setId:'',texts:JSON.stringify(t),answers:DEMO.map((q,i)=>sel[i]===-2||(sel[i]===undefined&&!q.num)?-2:q.num?-1:sel[i])};
+ const t={};DEMO.forEach((q,i)=>{if((q.num||q.sudoku)&&sel[i]!==-2&&txt[i])t[i]=txt[i]});
+ const sub={name:name||'연습',setId:'',texts:JSON.stringify(t),answers:DEMO.map((q,i)=>sel[i]===-2||(sel[i]===undefined&&!q.num&&!q.sudoku)?-2:(q.num||q.sudoku)?-1:sel[i])};
  $.innerHTML=`<h1 class="jua">연습 결과</h1><p class="lead">진짜 문제에서도 이렇게 소리가 나와요. 대본과 해설을 확인해 보세요.</p>`+card(sub,DEMO,'student')+
  `<button class="all" onclick="demo()">다시 해 보기</button><button class="home" onclick="location.hash=T.app?'#app':'';if(!T.app)home()">처음으로</button>`;
  scrollTo(0,0);
 }
 function payload(){
- const p={page:PAGE,name,grade,setId:set.date,answers:set.questions.map((q,i)=>sel[i]===-2?-2:(q.open||q.num)?-1:sel[i])};
+ const p={page:PAGE,name,grade,setId:set.date,answers:set.questions.map((q,i)=>sel[i]===-2?-2:(q.open||q.num||q.sudoku)?-1:sel[i])};
  const t={};for(const k in txt)if(sel[k]!==-2&&String(txt[k]).trim())t[k]=txt[k];
  if(Object.keys(t).length)p.texts=JSON.stringify(t);
  return p;
@@ -253,6 +351,7 @@ async function done(){
   const r=await postJSON(API+'/submit',p);
   if(!r.ok||!r.j||!r.j.rid)throw 0;
   const mine=store.get('lt_mine',[]);mine.unshift({rid:r.j.rid,date:p.setId,grade,name,at:Date.now()});store.set('lt_mine',mine.slice(0,30));
+  try{localStorage.removeItem(`lt_sdk_${p.setId}_${grade}`)}catch(e){}
   $.innerHTML=`<h1 class="jua">제출 완료!</h1><p class="lead">${esc(name)}님, 수고했어요. 선생님이 확인(OK)하면 아래 버튼에서 점수와 정답, 해설을 볼 수 있어요.</p>
   <button class="all" onclick="location.hash='#r=${r.j.rid}'">내 결과 보기</button><button class="home" onclick="location.hash='';home()">처음으로</button>`;
  }catch(e){backup(p)}
@@ -277,9 +376,14 @@ const numEq=(a,b)=>{const x=String(a??'').replace(/[,\s]/g,'').match(/^-?\d+(\.\
 const textsOf=s=>{try{return s?JSON.parse(s):{}}catch(e){return{}}};
 function grade1(sub,qs){
  const t=textsOf(sub.texts);
- const rows=qs.map((q,i)=>{const dk=sub.answers[i]===-2;return{q,dk,open:!!q.open,ok:!dk&&(q.num?numEq(t[i],q.ans):!q.open&&sub.answers[i]===q.answer),mine:dk?'잘 몰라요':(q.open||q.num)?t[i]:(q.options||[])[sub.answers[i]]}});
+ const rows=qs.map((q,i)=>{const dk=sub.answers[i]===-2;return{q,dk,open:!!q.open,ok:!dk&&(q.sudoku?t[i]===q.sol:q.num?numEq(t[i],q.ans):!q.open&&sub.answers[i]===q.answer),mine:dk?'잘 몰라요':(q.open||q.num||q.sudoku)?t[i]:(q.options||[])[sub.answers[i]]}});
  const mc=rows.filter(r=>!r.open);
  return{rows,mc,tot:mc.filter(r=>r.ok).length,nopen:rows.length-mc.length,nk:rows.filter(r=>r.dk).length};
+}
+// 스도쿠 답: 내가 채운 판(맞은 칸 초록, 틀린 칸 빨강) + 틀렸으면 정답 판
+function sdkAns(r,st){
+ const g=r.dk?null:r.mine,{blank,ok}=sdkScore(r.q,g);
+ return `${st?'내 판':'학생 판'}: ${r.dk?'잘 몰라요':`빈칸 ${blank}개 중 <b>${ok}개</b> 맞음`}<br>${g?sdkMini(r.q.sudoku,g,r.q.sol):''}${r.ok?'':`<details><summary>정답 판 보기</summary>${sdkMini(r.q.sudoku,r.q.sol,null)}</details>`}`;
 }
 // mode: 'list'(교사) | 'student'
 function card(sub,qs,mode){
@@ -287,7 +391,7 @@ function card(sub,qs,mode){
  if(!qs||sub.answers.length!==qs.length)return `<div class="res" style="--c:var(--no)"><h3>채점할 수 없는 제출</h3><div class="weak">${esc(sub.name)}</div></div>`;
  const g=grade1(sub,qs);
  const per=Object.keys(SUBJ).map(k=>{const r=g.mc.filter(x=>x.q.s===k);return r.length?`<span class="chip" style="--c:${SUBJ[k].c}">${SUBJ[k].n} ${r.filter(x=>x.ok).length}/${r.length}</span>`:''}).join('');
- const items=g.rows.map((r,i)=>`<div class="wrong"><b style="color:${r.dk?'var(--s)':r.open?'var(--e)':r.ok?'var(--ok)':'var(--no)'}">${r.dk?'몰라요':r.open?(st?'선생님 확인':'직접 확인'):r.ok?'정답':'오답'}</b> ${i+1}번 ${SUBJ[r.q.s].n} · ${esc(r.q.unit)}${r.q.script?`<button class="mini" data-s="${esc(r.q.script)}" onclick="hearText(this.dataset.s)">▶ 다시 듣기</button><div class="script">${esc(r.q.script)}</div>`:'<br>'}<span style="white-space:pre-line">${rich(r.q.q)}</span><br>${st?'내 답':'학생 답'}: ${r.open?esc(r.mine??'(미응답)'):rich(r.mine??'(미응답)')}${r.open?`<br>모범 답안: ${rich(r.q.model)}`:r.ok?'':`<br>정답: ${r.q.num?esc(r.q.ans):rich(r.q.options[r.q.answer])}`}<br><span class="weak">${rich(r.q.exp)}</span></div>`).join('');
+ const items=g.rows.map((r,i)=>`<div class="wrong"><b style="color:${r.dk?'var(--s)':r.open?'var(--e)':r.ok?'var(--ok)':'var(--no)'}">${r.dk?'몰라요':r.open?(st?'선생님 확인':'직접 확인'):r.ok?'정답':'오답'}</b> ${i+1}번 ${SUBJ[r.q.s].n} · ${esc(r.q.unit)}${r.q.script?`<button class="mini" data-s="${esc(r.q.script)}" onclick="hearText(this.dataset.s)">▶ 다시 듣기</button><div class="script">${esc(r.q.script)}</div>`:'<br>'}<span style="white-space:pre-line">${rich(r.q.q)}</span><br>${r.q.sudoku?sdkAns(r,st):`${st?'내 답':'학생 답'}: ${r.open?esc(r.mine??'(미응답)'):rich(r.mine??'(미응답)')}${r.open?`<br>모범 답안: ${rich(r.q.model)}`:r.ok?'':`<br>정답: ${r.q.num?esc(r.q.ans):rich(r.q.options[r.q.answer])}`}`}<br><span class="weak">${rich(r.q.exp)}</span></div>`).join('');
  const info=`${sub.at?when(sub.at)+' 제출 · ':''}${sub.grade?sub.grade+'학년 · ':''}${fmt(sub.setId)} 문제${g.nk?` · 몰라요 ${g.nk}개`:''}${g.nopen?` · 서술형 ${g.nopen}문항은 ${st?'선생님이 확인해요':'직접 확인'}`:''}`;
  return `<div class="res" style="--c:var(--ink)"><h3><span>${esc(sub.name)}</span><span>정답 ${g.tot}/${g.mc.length}</span></h3>
  <div class="weak">${info}</div><div class="chips">${per}</div>
@@ -346,7 +450,7 @@ function teacherView(){
    <button class="rel ${s.released?'off':''}" onclick="release(${!s.released})">${s.released?'공개 취소 (다시 숨기기)':'OK — 학생에게 정답·해설 공개'}</button>
    <div class="weak" style="margin-top:6px">공개하면 ${fmt(d.date)} ${T.tab}학년을 낸 모든 학생이 자기 결과 화면에서 점수·정답·해설을 볼 수 있어요.</div>
   </div>
-  <details class="box"><summary>문제와 정답 미리보기 (${s.questions.length}문항)</summary>${s.questions.map((q,i)=>`<div class="wrong"><b>${i+1}번</b> ${SUBJ[q.s].n} · ${esc(q.unit)}${q.passage&&(i===0||s.questions[i-1].passage!==q.passage)?`<div class="psg">${esc(q.passage)}</div>`:'<br>'}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.script?`<button class="mini" data-s="${esc(q.script)}" onclick="hearText(this.dataset.s)">▶ 들어 보기</button><div class="script">${esc(q.script)}</div>`:''}<span style="white-space:pre-line">${rich(q.q)}</span><br>${q.open?`모범 답안: ${rich(q.model)}`:q.num?`정답(숫자 입력): <b style="color:var(--ok)">${esc(q.ans)}</b>`:q.options.map((o,j)=>`<span style="${j===q.answer?'color:var(--ok);font-weight:700':''}">${'①②③④'[j]} ${rich(o)}</span>`).join('<br>')}<br><span class="weak">${rich(q.exp)}</span></div>`).join('')}</details>
+  <details class="box"><summary>문제와 정답 미리보기 (${s.questions.length}문항)</summary>${s.questions.map((q,i)=>`<div class="wrong"><b>${i+1}번</b> ${SUBJ[q.s].n} · ${esc(q.unit)}${q.passage&&(i===0||s.questions[i-1].passage!==q.passage)?`<div class="psg">${esc(q.passage)}</div>`:'<br>'}${q.fig?`<div class="fig">${q.fig}</div>`:''}${q.script?`<button class="mini" data-s="${esc(q.script)}" onclick="hearText(this.dataset.s)">▶ 들어 보기</button><div class="script">${esc(q.script)}</div>`:''}<span style="white-space:pre-line">${rich(q.q)}</span><br>${q.sudoku?`<div class="row" style="align-items:flex-start;gap:14px"><div><div class="weak">문제</div>${sdkMini(q.sudoku,q.sudoku,null)}</div><div><div class="weak">정답</div>${sdkMini(q.sudoku,q.sol,null)}</div></div>`:q.open?`모범 답안: ${rich(q.model)}`:q.num?`정답(숫자 입력): <b style="color:var(--ok)">${esc(q.ans)}</b>`:q.options.map((o,j)=>`<span style="${j===q.answer?'color:var(--ok);font-weight:700':''}">${'①②③④'[j]} ${rich(o)}</span>`).join('<br>')}<br><span class="weak">${rich(q.exp)}</span></div>`).join('')}</details>
   <h2 class="sec">제출한 학생</h2>
   ${subs.map(x=>card(x,s.questions,'list')).join('')||'<p class="lead">아직 제출한 학생이 없어요.</p>'}`;
  }
@@ -357,7 +461,7 @@ function teacherView(){
  <button class="home" onclick="teacherLoad(T.date)">새로 고침</button>
  <div style="margin-top:14px">${weekTable(d.week,T.tab)}${body}</div>
  <p class="weak">전송 실패로 제출 코드를 받았다면 <a href="#teacher" style="color:var(--e)">제출 코드 등록하기</a></p>
- ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="location.hash='#demo'">▶ 연습 문제 (듣기·사고력)</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
+ ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="location.hash='#demo'">▶ 연습 문제 (듣기·사고력·스도쿠)</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
 }
 async function release(on){
  const btn=document.querySelector('.rel');btn.disabled=true;btn.textContent='처리 중…';

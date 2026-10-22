@@ -43,13 +43,13 @@ async function isTeacher(key: unknown) {
   return diff === 0;
 }
 
-type Q = { s: string; unit: string; q: string; passage?: string; fig?: string; script?: string; options?: string[]; answer?: number; open?: boolean; model?: string; num?: boolean; ans?: string; exp: string };
+type Q = { s: string; unit: string; q: string; passage?: string; fig?: string; script?: string; options?: string[]; answer?: number; open?: boolean; model?: string; num?: boolean; ans?: string; sudoku?: string; sol?: string; exp: string };
 type SetRow = { date: string; grade: number; questions: Q[]; released: boolean };
 type SubRow = { rid: string; page: string; name: string; set_id: string; grade: number | null; answers: number[]; texts: string | null; created_at: string };
 
 // 학생에게 보내는 문항: 정답(answer·ans)·해설·모범답안 제외. 듣기 대본(script)은 소리로 읽어 주려고 보내지만 화면에는 표시하지 않는다.
-// num = 사고력 수학(숫자를 직접 입력)
-const strip = (q: Q) => ({ s: q.s, unit: q.unit, q: q.q, passage: q.passage, fig: q.fig, script: q.script, options: q.options, open: q.open, num: q.num });
+// num = 사고력 수학(숫자를 직접 입력), sudoku = 스도쿠 문제판(81자, 0=빈칸). 정답 판(sol)은 보내지 않는다.
+const strip = (q: Q) => ({ s: q.s, unit: q.unit, q: q.q, passage: q.passage, fig: q.fig, script: q.script, options: q.options, open: q.open, num: q.num, sudoku: q.sudoku });
 const subOut = (r: SubRow) => ({
   rid: r.rid, page: r.page, name: r.name, setId: r.set_id, grade: r.grade ?? undefined,
   answers: r.answers, texts: r.texts ?? undefined, at: new Date(r.created_at).getTime(),
@@ -122,11 +122,11 @@ Deno.serve(async (req) => {
         if (grade === undefined || !GRADES.includes(grade)) return json({ error: "bad grade" }, 400);
         const set = await getSet(setId, grade);
         if (!set) return json({ error: "no set" }, 400);
-        // -2 = '잘 몰라요', -1 = 서술형·숫자 입력(답은 texts)
+        // -2 = '잘 몰라요', -1 = 서술형·숫자 입력·스도쿠(답은 texts)
         const ok = answers.length === set.questions.length && set.questions.every((q, i) => {
           const a = answers[i] as number;
           if (a === -2) return true;
-          return q.open || q.num ? a === -1 : a >= 0 && a < (q.options?.length ?? 0);
+          return q.open || q.num || q.sudoku ? a === -1 : a >= 0 && a < (q.options?.length ?? 0);
         });
         if (!ok) return json({ error: "answers mismatch" }, 400);
       }

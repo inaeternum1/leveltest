@@ -13,9 +13,10 @@
 | `supabase/functions/api/index.ts` | 서버 API (Supabase Edge Function `api`) |
 | `content/RULES.md` | 매일 출제 규칙 |
 | `android/` | 앱 원본. 바뀌면 GitHub Actions가 APK를 다시 만들어 루트에 올림 |
+| `tools/sudoku_bank.py` | 스도쿠 문제 은행 만들기(정답 하나·논리로만 풀리는지 확인). 결과는 DB `sudoku_bank`에 넣고, 저장 함수가 날마다 하나씩 꺼내 11번에 붙임 |
 
 ## 데이터
-Supabase 프로젝트 `leveltest` (서울). 테이블 `sets`(날짜·학년별 문제, 정답 포함), `submissions`(제출), `config`.
+Supabase 프로젝트 `leveltest` (서울). 테이블 `sets`(날짜·학년별 문제, 정답 포함), `submissions`(제출), `config`, `sudoku_bank`(스도쿠 문제 은행).
 모든 테이블은 공개 키로 접근할 수 없고, Edge Function만 읽고 쓴다.
 
 ## 화면을 고칠 때
