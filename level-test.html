@@ -116,7 +116,7 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 <main id="app"></main>
 <script>
 // 새 버전 자동 반영: 폰이 예전 화면을 저장해 두었으면 version.txt와 비교해 한 번만 새로 불러온다.
-const BUILD='202610242200';
+const BUILD='202610242215';
 (async()=>{try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
  if(v&&v!==BUILD&&sessionStorage.getItem('lt_reloaded')!==v){sessionStorage.setItem('lt_reloaded',v);location.replace(location.pathname+'?v='+v+location.hash)}}catch(e){}})();
 const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
@@ -443,7 +443,8 @@ async function noticeLoad(){
  el.className='';
  el.innerHTML=`<p class="weak" style="margin:6px 0 10px">학생 앱(새 버전)을 깐 폰에만 가요. 앱이 15분마다 확인해서, 보통 15분 안에 도착해요.</p>
  <label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="nd-on" style="width:auto" ${d.on?'checked':''}> 매일 알림</label>
- <div class="row" style="flex-wrap:nowrap"><input type="time" id="nd-time" value="${esc(d.time)}" style="flex:0 0 9em"><input id="nd-body" maxlength="120" value="${esc(d.body)}"></div>
+ <label for="nd-time">시각</label><input type="time" id="nd-time" value="${esc(d.time)}" style="max-width:12em">
+ <label for="nd-body">알림 문구</label><input id="nd-body" maxlength="120" value="${esc(d.body)}">
  <button class="home" onclick="noticeSave()">매일 알림 저장</button>
  <label for="np-body" style="margin-top:14px">지금 보내기</label>
  <input id="np-body" maxlength="120" value="오늘 문제 풀었나요? 아직이면 지금 풀어 봐요! ✏️">
