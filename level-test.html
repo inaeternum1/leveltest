@@ -116,7 +116,7 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 <main id="app"></main>
 <script>
 // 새 버전 자동 반영: 폰이 예전 화면을 저장해 두었으면 version.txt와 비교해 한 번만 새로 불러온다.
-const BUILD='202610221720';
+const BUILD='202610242200';
 (async()=>{try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
  if(v&&v!==BUILD&&sessionStorage.getItem('lt_reloaded')!==v){sessionStorage.setItem('lt_reloaded',v);location.replace(location.pathname+'?v='+v+location.hash)}}catch(e){}})();
 const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
@@ -199,6 +199,7 @@ function home(){
  <label>학년</label><div class="grades">${[4,5].map(g=>`<button class="gbtn ${grade===g?'pick':''}" onclick="pickGrade(${g})">${g}학년</button>`).join('')}</div>
  <button class="all" onclick="start()">시작하기</button>
  <button class="home" onclick="location.hash='#demo'">▶ 연습 문제: 영어 듣기·사고력 수학·스도쿠 (저장 안 돼요)</button>
+ ${window.LTApp&&LTApp.canNotify&&LTApp.canNotify()?`<button class="home" onclick="LTApp.testNotify()">🔔 알림 테스트 (매일 오후에 새 문제 알림이 와요)</button>`:''}
  <p id="msg" class="lead" role="status" style="margin-top:10px"></p>
  ${mine.length?`<h2 class="sec">내 결과</h2><div class="box mine"><ul style="margin:0;padding-left:18px">${mine.map(m=>`<li><a href="#r=${m.rid}">${fmt(m.date)} ${m.grade}학년 · ${esc(m.name)}</a></li>`).join('')}</ul><div class="weak" style="margin-top:6px">선생님이 확인하면 정답과 해설이 열려요.</div></div>`:''}`;
  loadWeek();
@@ -433,6 +434,36 @@ async function teacherLoad(date){
   T.data=r.j;T.date=r.j.date;teacherView();
  }catch(e){fail('불러오지 못했어요','인터넷 연결을 확인하고 다시 시도해 주세요.')}
 }
+/* ---------- 학생 앱 알림 설정(교사) ---------- */
+async function noticeLoad(){
+ const el=document.getElementById('ntc-b');if(!el)return;
+ let n=null;try{const r=await getJSON(API+'/notice');if(r.ok)n=r.j}catch(e){}
+ if(!document.getElementById('ntc-b'))return;
+ const d=(n&&n.daily)||{on:true,time:'16:00',body:'오늘 문제가 올라왔어요. 지금 풀어 볼까요?'},p=n&&n.push;
+ el.className='';
+ el.innerHTML=`<p class="weak" style="margin:6px 0 10px">학생 앱(새 버전)을 깐 폰에만 가요. 앱이 15분마다 확인해서, 보통 15분 안에 도착해요.</p>
+ <label style="display:flex;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="nd-on" style="width:auto" ${d.on?'checked':''}> 매일 알림</label>
+ <div class="row" style="flex-wrap:nowrap"><input type="time" id="nd-time" value="${esc(d.time)}" style="flex:0 0 9em"><input id="nd-body" maxlength="120" value="${esc(d.body)}"></div>
+ <button class="home" onclick="noticeSave()">매일 알림 저장</button>
+ <label for="np-body" style="margin-top:14px">지금 보내기</label>
+ <input id="np-body" maxlength="120" value="오늘 문제 풀었나요? 아직이면 지금 풀어 봐요! ✏️">
+ <button class="home" onclick="noticePush()">모든 학생 앱에 지금 보내기</button>
+ ${p&&p.at?`<div class="weak" style="margin-top:6px">마지막으로 보낸 알림: ${when(p.at)} · ${esc(p.body)}</div>`:''}
+ <p id="ntc-msg" class="weak" role="status" style="margin:8px 0 0"></p>`;
+}
+async function noticeSave(){
+ const m=document.getElementById('ntc-msg');m.textContent='저장하는 중…';
+ try{const r=await postJSON(API+'/notice',{key:T.key,daily:{on:document.getElementById('nd-on').checked,time:document.getElementById('nd-time').value,body:document.getElementById('nd-body').value}});
+  if(!r.ok)throw 0;m.textContent=document.getElementById('nd-on').checked?`저장했어요. 매일 ${document.getElementById('nd-time').value}에 알림이 가요.`:'매일 알림을 껐어요.'}
+ catch(e){m.textContent='저장하지 못했어요. 시각을 확인하고 다시 눌러 주세요.'}
+}
+async function noticePush(){
+ const m=document.getElementById('ntc-msg'),t=document.getElementById('np-body').value.trim();
+ if(!t){m.textContent='보낼 말을 써 주세요.';return}
+ m.textContent='보내는 중…';
+ try{const r=await postJSON(API+'/notice',{key:T.key,push:{body:t}});if(!r.ok)throw 0;m.textContent='보냈어요. 학생 폰에 보통 15분 안에 도착해요(앱을 방금 닫았다면 1분쯤).'}
+ catch(e){m.textContent='보내지 못했어요. 다시 눌러 주세요.'}
+}
 function teacherView(){
  const d=T.data;
  if(!d.date){$.innerHTML=`<h1 class="jua">채점 화면</h1><p class="lead">아직 만들어진 문제가 없어요.</p>`;return}
@@ -460,8 +491,10 @@ function teacherView(){
  <div class="grades" style="margin-top:12px">${[4,5].map(g=>`<button class="gbtn ${T.tab===g?'pick':''}" onclick="T.tab=${g};teacherView()">${g}학년 (${d.subs.filter(x=>x.grade===g).length})</button>`).join('')}</div>
  <button class="home" onclick="teacherLoad(T.date)">새로 고침</button>
  <div style="margin-top:14px">${weekTable(d.week,T.tab)}${body}</div>
+ <div class="box" id="ntc"><b>🔔 학생 앱 알림</b><div id="ntc-b" class="weak">불러오는 중…</div></div>
  <p class="weak">전송 실패로 제출 코드를 받았다면 <a href="#teacher" style="color:var(--e)">제출 코드 등록하기</a></p>
  ${T.app?`<button class="home" onclick="location.hash='#student'">학생 화면 미리 보기</button><button class="home" onclick="location.hash='#demo'">▶ 연습 문제 (듣기·사고력·스도쿠)</button><button class="home" onclick="shareStudent()">학생 주소 공유하기</button><button class="home" style="border-color:var(--sub);color:var(--sub)" onclick="appLogout()">이 폰에서 로그아웃</button>`:''}`;
+ noticeLoad();
 }
 async function release(on){
  const btn=document.querySelector('.rel');btn.disabled=true;btn.textContent='처리 중…';

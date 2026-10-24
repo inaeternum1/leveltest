@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="__PKG__">
   <uses-permission android:name="android.permission.INTERNET"/>
+  <!-- 학생 앱 알림: 안드로이드 13 이상 알림 권한, 폰을 다시 켜도 알림 확인을 이어 가기 -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
   <!-- 안드로이드 11 이상에서 음성 엔진(TTS)을 찾으려면 필요 -->
   <queries>
     <intent>
@@ -16,5 +19,11 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+    <receiver android:name=".Notifier" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED"/>
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+      </intent-filter>
+    </receiver>
   </application>
 </manifest>

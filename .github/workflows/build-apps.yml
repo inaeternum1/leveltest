@@ -30,17 +30,19 @@ jobs:
           keytool -genkeypair -keystore ks.p12 -storetype PKCS12 -storepass "$PASS" -keypass "$PASS" \
             -alias lt -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=LevelTest" >/dev/null
           build() {
-            local kind=$1 pkg=$2 label=$3 start=$4 reload=$5 vc=$6
+            local kind=$1 pkg=$2 label=$3 start=$4 reload=$5 vc=$6 notify=$7
             local W=build/$kind
             mkdir -p "$W/classes" "$W/gen" "$W/dex" "$W/res"
             sed -e "s|__PKG__|$pkg|" -e "s|__LABEL__|$label|" android/AndroidManifest.xml > "$W/AndroidManifest.xml"
             local dir="$W/src/$(echo "$pkg" | tr . /)"; mkdir -p "$dir"
-            sed -e "s|__PKG__|$pkg|" -e "s|__HOST__|inaeternum1.github.io|" -e "s|__START__|$start|" \
-                -e "s|__RELOAD__|$reload|" android/src/MainActivity.java > "$dir/MainActivity.java"
+            for f in android/src/*.java; do
+              sed -e "s|__PKG__|$pkg|" -e "s|__HOST__|inaeternum1.github.io|" -e "s|__START__|$start|" \
+                  -e "s|__RELOAD__|$reload|" -e "s|__NOTIFY__|$notify|" "$f" > "$dir/$(basename "$f")"
+            done
             python3 android/make_icons.py "$kind" "$W/res"
             "$BT/aapt2" compile --dir "$W/res" -o "$W/res.zip"
             "$BT/aapt2" link -I "$PF" --manifest "$W/AndroidManifest.xml" -o "$W/base.apk" "$W/res.zip" --java "$W/gen" \
-              --min-sdk-version 24 --target-sdk-version 34 --version-code "$vc" --version-name 2.1 --auto-add-overlay
+              --min-sdk-version 24 --target-sdk-version 34 --version-code "$vc" --version-name 2.2 --auto-add-overlay
             javac -encoding UTF-8 --release 11 -cp "$PF" -d "$W/classes" $(find "$W/src" "$W/gen" -name '*.java')
             "$BT/d8" --lib "$PF" --min-api 24 --release --output "$W/dex" $(find "$W/classes" -name '*.class')
             cp "$W/base.apk" "$W/unsigned.apk"
@@ -50,8 +52,8 @@ jobs:
             "$BT/apksigner" verify "leveltest-$kind.apk"
             "$BT/aapt2" dump badging "leveltest-$kind.apk" | grep -E "^package|application-label:"
           }
-          build teacher kr.leveltest.teacher "레벨테스트 관리" "$SITE/level-test.html#app" false 11
-          build student kr.leveltest.student "오늘의 레벨 테스트" "$SITE/level-test.html" true 11
+          build teacher kr.leveltest.teacher "레벨테스트 관리" "$SITE/level-test.html#app" false 12 false
+          build student kr.leveltest.student "오늘의 레벨 테스트" "$SITE/level-test.html" true 12 true
           rm -rf build ks.p12
           ls -la leveltest-*.apk
       - name: Commit APKs

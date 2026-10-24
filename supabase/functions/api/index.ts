@@ -24,6 +24,7 @@ const kst = (plusDays = 0) => new Date(Date.now() + 9 * 3600e3 + plusDays * 8640
 const todayKST = () => kst(0);
 // 오늘(한국 시간)까지 최근 7일, 오래된 날부터
 const week = () => [-6, -5, -4, -3, -2, -1, 0].map((d) => kst(d));
+const DAILY_DEFAULT = { on: true, time: "16:00", title: "오늘의 레벨 테스트", body: "오늘 문제가 올라왔어요. 지금 풀어 볼까요?" };
 
 let keyHash: string | null = null;
 async function sha256(s: string) {
@@ -205,6 +206,41 @@ Deno.serve(async (req) => {
         subs: (wsubs ?? []).map((r: { name: string; grade: number; set_id: string }) => ({ name: r.name, grade: r.grade, date: r.set_id })),
       };
       return json({ dates, date, sets: (srows as SetRow[]).map(setOut), subs: (subs as SubRow[]).map(subOut), week: weekOut });
+    }
+
+    // 학생 앱 알림 설정(앱이 15분마다 읽음): 매일 알림 시각, 선생님이 '지금 보내기'한 알림
+    if (req.method === "GET" && route === "notice") {
+      const { data, error } = await sb.from("config").select("key,value").in("key", ["notice_daily", "notice_push"]);
+      if (error) throw error;
+      const get = (k: string) => { try { return JSON.parse((data ?? []).find((r: { key: string }) => r.key === k)?.value ?? "null"); } catch { return null; } };
+      return json({ daily: get("notice_daily") ?? DAILY_DEFAULT, push: get("notice_push") });
+    }
+
+    if (req.method === "POST" && route === "notice") {
+      const b = await body(req);
+      if (!b) return json({ error: "bad json" }, 400);
+      if (!(await isTeacher(b.key))) return json({ error: "forbidden" }, 403);
+      const clean = (t: unknown, max: number) => typeof t === "string" ? t.trim().slice(0, max) : "";
+      const rows: { key: string; value: string }[] = [];
+      if (b.daily && typeof b.daily === "object") {
+        const d = b.daily as Record<string, unknown>;
+        const time = String(d.time ?? "");
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return json({ error: "bad time" }, 400);
+        rows.push({ key: "notice_daily", value: JSON.stringify({
+          on: d.on === true, time, title: clean(d.title, 40) || DAILY_DEFAULT.title, body: clean(d.body, 120) || DAILY_DEFAULT.body,
+        }) });
+      }
+      if (b.push && typeof b.push === "object") {
+        const d = b.push as Record<string, unknown>;
+        const text = clean(d.body, 120);
+        if (!text) return json({ error: "bad body" }, 400);
+        const now = Date.now();
+        rows.push({ key: "notice_push", value: JSON.stringify({ id: now, at: now, title: clean(d.title, 40) || "선생님 알림", body: text }) });
+      }
+      if (!rows.length) return json({ error: "nothing" }, 400);
+      const { error } = await sb.from("config").upsert(rows, { onConflict: "key" });
+      if (error) throw error;
+      return json({ ok: true });
     }
 
     if (req.method === "POST" && route === "release") {

@@ -5,6 +5,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
@@ -25,6 +27,9 @@ public class MainActivity extends Activity {
     static final String HOST = "__HOST__";
     static final String START = "__START__";
     static final boolean RELOAD_ON_RESUME = __RELOAD__;
+    static final boolean NOTIFY = __NOTIFY__;
+    static final String NOTIFY_PERM = "android.permission.POST_NOTIFICATIONS";
+    boolean testAfterGrant = false;
     WebView web;
     long pausedAt = 0;
     TextToSpeech tts;
@@ -63,6 +68,15 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public void stopSpeak() {
             runOnUiThread(() -> { if (tts != null) tts.stop(); });
+        }
+        // 학생 앱 알림: 웹 화면에서 '알림 테스트'를 누르면 바로 하나 띄운다. 권한이 없으면 먼저 묻는다.
+        @JavascriptInterface public boolean canNotify() { return NOTIFY; }
+        @JavascriptInterface public void testNotify() {
+            runOnUiThread(() -> {
+                if (!NOTIFY) return;
+                if (needPerm()) { testAfterGrant = true; requestPermissions(new String[]{NOTIFY_PERM}, 7); return; }
+                Notifier.show(MainActivity.this, 300, "알림 테스트", "알림이 잘 와요! 매일 정해진 시간에 오늘의 문제를 알려 줄게요.");
+            });
         }
         @JavascriptInterface public void copy(final String text) {
             runOnUiThread(() -> {
@@ -112,9 +126,25 @@ public class MainActivity extends Activity {
             }
         });
         if (state != null) web.restoreState(state); else web.loadUrl(START);
+        if (NOTIFY) {
+            if (needPerm()) requestPermissions(new String[]{NOTIFY_PERM}, 7);
+            Notifier.schedule(this, 30_000L);
+        }
     }
 
-    @Override protected void onPause() { super.onPause(); pausedAt = SystemClock.elapsedRealtime(); if (tts != null) tts.stop(); }
+    boolean needPerm() { return Build.VERSION.SDK_INT >= 33 && checkSelfPermission(NOTIFY_PERM) != PackageManager.PERMISSION_GRANTED; }
+
+    @Override public void onRequestPermissionsResult(int code, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(code, perms, res);
+        if (code != 7) return;
+        boolean ok = res.length > 0 && res[0] == PackageManager.PERMISSION_GRANTED;
+        if (ok && testAfterGrant) Notifier.show(this, 300, "알림 테스트", "알림이 잘 와요! 매일 정해진 시간에 오늘의 문제를 알려 줄게요.");
+        if (!ok) Toast.makeText(this, "알림이 꺼져 있어요. 설정 > 애플리케이션 > 오늘의 레벨 테스트 > 알림에서 켤 수 있어요.", Toast.LENGTH_LONG).show();
+        testAfterGrant = false;
+    }
+
+    // 앱을 닫으면 1분 뒤 알림을 한 번 확인한다(선생님이 방금 보낸 알림이 빨리 오도록)
+    @Override protected void onPause() { super.onPause(); pausedAt = SystemClock.elapsedRealtime(); if (tts != null) tts.stop(); if (NOTIFY) Notifier.schedule(this, 60_000L); }
 
     @Override protected void onDestroy() { if (tts != null) tts.shutdown(); super.onDestroy(); }
 
