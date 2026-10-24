@@ -45,6 +45,7 @@ async function isTeacher(key: unknown) {
 }
 
 type Q = { s: string; unit: string; q: string; passage?: string; fig?: string; script?: string; options?: string[]; answer?: number; open?: boolean; model?: string; num?: boolean; ans?: string; sudoku?: string; sol?: string; exp: string };
+type Push = { id: number; at: number; title: string; body: string; name?: string; grade?: number };
 type SetRow = { date: string; grade: number; questions: Q[]; released: boolean };
 type SubRow = { rid: string; page: string; name: string; set_id: string; grade: number | null; answers: number[]; texts: string | null; created_at: string };
 
@@ -210,10 +211,14 @@ Deno.serve(async (req) => {
 
     // 학생 앱 알림 설정(앱이 15분마다 읽음): 매일 알림 시각, 선생님이 '지금 보내기'한 알림
     if (req.method === "GET" && route === "notice") {
-      const { data, error } = await sb.from("config").select("key,value").in("key", ["notice_daily", "notice_push"]);
+      const { data, error } = await sb.from("config").select("key,value").in("key", ["notice_daily", "notice_push", "notice_pushes"]);
       if (error) throw error;
       const get = (k: string) => { try { return JSON.parse((data ?? []).find((r: { key: string }) => r.key === k)?.value ?? "null"); } catch { return null; } };
-      return json({ daily: get("notice_daily") ?? DAILY_DEFAULT, push: get("notice_push") });
+      // pushes: 전체에게 보낸 것 + (이름·학년을 알려 준 앱이면) 그 학생에게만 보낸 것, 오래된 것부터
+      const name = (p.get("name") ?? "").trim(), grade = Number(p.get("grade"));
+      const all = (get("notice_pushes") ?? []) as Push[];
+      const pushes = all.filter((x) => !x.name || (x.name === name && x.grade === grade));
+      return json({ daily: get("notice_daily") ?? DAILY_DEFAULT, push: get("notice_push"), pushes });
     }
 
     if (req.method === "POST" && route === "notice") {
@@ -234,8 +239,17 @@ Deno.serve(async (req) => {
         const d = b.push as Record<string, unknown>;
         const text = clean(d.body, 120);
         if (!text) return json({ error: "bad body" }, 400);
+        const to = clean(d.name, 20), toGrade = Number(d.grade);
+        if (to && !GRADES.includes(toGrade)) return json({ error: "bad grade" }, 400);
         const now = Date.now();
-        rows.push({ key: "notice_push", value: JSON.stringify({ id: now, at: now, title: clean(d.title, 40) || "선생님 알림", body: text }) });
+        const item: Push = { id: now, at: now, title: clean(d.title, 40) || (to ? `${to} 학생에게` : "선생님 알림"), body: text };
+        if (to) { item.name = to; item.grade = toGrade; }
+        const { data: cur } = await sb.from("config").select("value").eq("key", "notice_pushes").maybeSingle();
+        let list: Push[] = [];
+        try { list = JSON.parse(cur?.value ?? "[]"); } catch { list = []; }
+        list = [...list.filter((x) => now - x.at < 24 * 3600 * 1000), item].slice(-40);
+        rows.push({ key: "notice_pushes", value: JSON.stringify(list) });
+        if (!to) rows.push({ key: "notice_push", value: JSON.stringify(item) });
       }
       if (!rows.length) return json({ error: "nothing" }, 400);
       const { error } = await sb.from("config").upsert(rows, { onConflict: "key" });

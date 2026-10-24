@@ -116,7 +116,7 @@ summary{cursor:pointer;color:var(--sub);margin-top:6px}
 <main id="app"></main>
 <script>
 // 새 버전 자동 반영: 폰이 예전 화면을 저장해 두었으면 version.txt와 비교해 한 번만 새로 불러온다.
-const BUILD='202610242215';
+const BUILD='202610242230';
 (async()=>{try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
  if(v&&v!==BUILD&&sessionStorage.getItem('lt_reloaded')!==v){sessionStorage.setItem('lt_reloaded',v);location.replace(location.pathname+'?v='+v+location.hash)}}catch(e){}})();
 const API='https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api',PAGE='level';
@@ -192,6 +192,7 @@ function weekTable(w,g){
 /* ---------- 학생: 시작 화면 ---------- */
 function home(){
  name=store.get('lt_name','');grade=store.get('lt_grade',0);
+ tellApp();
  const mine=store.get('lt_mine',[]).slice(0,10);
  $.innerHTML=`<div id="wk"></div><h1 class="jua">오늘의<br>레벨 테스트</h1>
  <p class="lead">국어·영어·영어 듣기·수학(사고력·스도쿠)·과학 14문제예요. 영어 듣기는 소리를 켜거나 이어폰을 끼고 풀어요. 새 문제는 매일 오후 3시에 올라와요. 다 풀고 제출하면, 선생님이 확인한 뒤 정답과 해설을 볼 수 있어요.<br><b>모르는 문제는 찍지 말고 '잘 몰라요'를 눌러 주세요.</b> 그래야 선생님이 어디를 도와줄지 알 수 있어요.</p>
@@ -204,13 +205,15 @@ function home(){
  ${mine.length?`<h2 class="sec">내 결과</h2><div class="box mine"><ul style="margin:0;padding-left:18px">${mine.map(m=>`<li><a href="#r=${m.rid}">${fmt(m.date)} ${m.grade}학년 · ${esc(m.name)}</a></li>`).join('')}</ul><div class="weak" style="margin-top:6px">선생님이 확인하면 정답과 해설이 열려요.</div></div>`:''}`;
  loadWeek();
 }
+// 학생 앱: 이 폰의 학생 이름·학년을 알려 두면 선생님이 이 학생에게만 보낸 알림도 받는다
+function tellApp(){try{if(name&&grade&&window.LTApp&&LTApp.setIdentity)LTApp.setIdentity(name,grade)}catch(e){}}
 function pickGrade(g){grade=g;store.set('lt_grade',g);document.querySelectorAll('.gbtn').forEach(b=>b.classList.toggle('pick',b.textContent===g+'학년'));loadWeek()}
 async function start(){
  const msg=document.getElementById('msg');
  name=document.getElementById('nm').value.trim();
  if(!name){document.getElementById('nm').focus();msg.textContent='이름을 입력해 주세요.';return}
  if(!grade){msg.textContent='학년을 골라 주세요.';return}
- store.set('lt_name',name);
+ store.set('lt_name',name);tellApp();
  msg.textContent='문제를 불러오는 중…';
  try{
   const r=await getJSON(`${API}/set?grade=${grade}`);
@@ -446,11 +449,19 @@ async function noticeLoad(){
  <label for="nd-time">시각</label><input type="time" id="nd-time" value="${esc(d.time)}" style="max-width:12em">
  <label for="nd-body">알림 문구</label><input id="nd-body" maxlength="120" value="${esc(d.body)}">
  <button class="home" onclick="noticeSave()">매일 알림 저장</button>
- <label for="np-body" style="margin-top:14px">지금 보내기</label>
+ <label for="np-to" style="margin-top:14px">지금 보내기 · 받는 사람</label>
+ <select id="np-to"><option value="">전체 학생</option>${noticeTargets().map(t=>`<option value="${esc(t.grade+'|'+t.name)}">${t.grade}학년 ${esc(t.name)}</option>`).join('')}</select>
+ <label for="np-body">보낼 말</label>
  <input id="np-body" maxlength="120" value="오늘 문제 풀었나요? 아직이면 지금 풀어 봐요! ✏️">
- <button class="home" onclick="noticePush()">모든 학생 앱에 지금 보내기</button>
+ <button class="home" onclick="noticePush()">알림 보내기</button>
+ <p class="weak" style="margin:6px 0 0">한 명에게 보내면 그 아이가 앱에 입력한 이름·학년이 같은 폰에만 가요. 목록에는 최근 7일 안에 낸 학생이 나와요.</p>
  ${p&&p.at?`<div class="weak" style="margin-top:6px">마지막으로 보낸 알림: ${when(p.at)} · ${esc(p.body)}</div>`:''}
  <p id="ntc-msg" class="weak" role="status" style="margin:8px 0 0"></p>`;
+}
+function noticeTargets(){
+ const w=T.data&&T.data.week,seen=new Set(),out=[];
+ ((w&&w.subs)||[]).forEach(x=>{const k=x.grade+'|'+x.name;if(!seen.has(k)){seen.add(k);out.push({grade:x.grade,name:x.name})}});
+ return out.sort((a,b)=>a.grade-b.grade||a.name.localeCompare(b.name,'ko'));
 }
 async function noticeSave(){
  const m=document.getElementById('ntc-msg');m.textContent='저장하는 중…';
@@ -462,7 +473,9 @@ async function noticePush(){
  const m=document.getElementById('ntc-msg'),t=document.getElementById('np-body').value.trim();
  if(!t){m.textContent='보낼 말을 써 주세요.';return}
  m.textContent='보내는 중…';
- try{const r=await postJSON(API+'/notice',{key:T.key,push:{body:t}});if(!r.ok)throw 0;m.textContent='보냈어요. 학생 폰에 보통 15분 안에 도착해요(앱을 방금 닫았다면 1분쯤).'}
+ const to=document.getElementById('np-to').value,[g,...nm]=to?to.split('|'):[],push={body:t};
+ if(to){push.grade=+g;push.name=nm.join('|')}
+ try{const r=await postJSON(API+'/notice',{key:T.key,push});if(!r.ok)throw 0;m.textContent=`${to?push.name+' 학생에게':'모든 학생에게'} 보냈어요. 보통 15분 안에 도착해요(앱을 방금 닫았다면 1분쯤).`}
  catch(e){m.textContent='보내지 못했어요. 다시 눌러 주세요.'}
 }
 function teacherView(){

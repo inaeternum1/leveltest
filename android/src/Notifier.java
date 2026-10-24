@@ -24,7 +24,8 @@ import java.util.TimeZone;
 
 // 학생 앱 알림. 서버(유료 푸시 서비스) 없이 앱이 15분마다 선생님 알림 설정을 확인한다.
 // - 매일 알림: 선생님이 정한 시각(한국 시간)이 되면 하루 한 번
-// - 지금 보내기: 선생님이 채점 화면에서 보낸 알림을 다음 확인 때(보통 15분 안) 한 번
+// - 지금 보내기: 선생님이 채점 화면에서 보낸 알림(전체 또는 이 학생에게만)을 다음 확인 때(보통 15분 안) 한 번
+//   학생 이름·학년은 웹 화면이 LTApp.setIdentity로 알려 준다.
 public class Notifier extends BroadcastReceiver {
     static final boolean ENABLED = __NOTIFY__;
     static final String API = "https://inulbquzdxzinpidgwhh.supabase.co/functions/v1/api/notice";
@@ -85,10 +86,14 @@ public class Notifier extends BroadcastReceiver {
         catch (Exception e) { return -1; }
     }
 
-    static JSONObject fetch() {
+    static JSONObject fetch(Context c) {
         HttpURLConnection h = null;
         try {
-            h = (HttpURLConnection) new URL(API).openConnection();
+            SharedPreferences sp = prefs(c);
+            String u = API;
+            String name = sp.getString("name", ""); int grade = sp.getInt("grade", 0);
+            if (!name.isEmpty() && grade > 0) u += "?grade=" + grade + "&name=" + java.net.URLEncoder.encode(name, "UTF-8");
+            h = (HttpURLConnection) new URL(u).openConnection();
             h.setConnectTimeout(10000);
             h.setReadTimeout(10000);
             if (h.getResponseCode() != 200) return null;
@@ -107,21 +112,26 @@ public class Notifier extends BroadcastReceiver {
     // 알림을 띄울지 판단하고 다음 확인 시각을 예약한다. (네트워크를 쓰므로 백그라운드 스레드에서 부른다)
     static void check(Context c) {
         SharedPreferences sp = prefs(c);
-        JSONObject j = fetch();
+        JSONObject j = fetch(c);
         if (j != null) sp.edit().putString("cfg", j.toString()).apply();
         else { try { j = new JSONObject(sp.getString("cfg", "{}")); } catch (Exception e) { j = new JSONObject(); } }
         long next = TICK;
 
-        // 1) 선생님이 '지금 보내기' 한 알림: 6시간 안의 것만 한 번
-        JSONObject push = j.optJSONObject("push");
-        if (push != null) {
-            long id = push.optLong("id", 0);
-            long at = push.optLong("at", 0);
-            if (id > 0 && id != sp.getLong("pushId", 0) && System.currentTimeMillis() - at < 6 * 3600 * 1000L) {
-                sp.edit().putLong("pushId", id).apply();
-                show(c, 200, push.optString("title", "오늘의 레벨 테스트"), push.optString("body", ""));
+        // 1) 선생님이 '지금 보내기' 한 알림(전체 + 이 학생에게 온 것): 6시간 안의 것 중 아직 안 띄운 것만
+        org.json.JSONArray list = j.optJSONArray("pushes");
+        if (list == null) { list = new org.json.JSONArray(); if (j.optJSONObject("push") != null) list.put(j.optJSONObject("push")); }
+        long seen = sp.getLong("pushId", 0), maxId = seen;
+        int shown = 0;
+        for (int k = 0; k < list.length(); k++) {
+            JSONObject push = list.optJSONObject(k);
+            if (push == null) continue;
+            long id = push.optLong("id", 0), at = push.optLong("at", 0);
+            if (id > seen && System.currentTimeMillis() - at < 6 * 3600 * 1000L) {
+                show(c, 200 + (shown++ % 20), push.optString("title", "오늘의 레벨 테스트"), push.optString("body", ""));
             }
+            if (id > maxId) maxId = id;
         }
+        if (maxId != seen) sp.edit().putLong("pushId", maxId).apply();
 
         // 2) 매일 알림: 정한 시각부터 6시간 안에 하루 한 번
         JSONObject daily = j.optJSONObject("daily");

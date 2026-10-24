@@ -71,6 +71,11 @@ public class MainActivity extends Activity {
         }
         // 학생 앱 알림: 웹 화면에서 '알림 테스트'를 누르면 바로 하나 띄운다. 권한이 없으면 먼저 묻는다.
         @JavascriptInterface public boolean canNotify() { return NOTIFY; }
+        // 학생 이름·학년을 알려 두면 그 학생에게만 보낸 알림도 받는다
+        @JavascriptInterface public void setIdentity(String name, int grade) {
+            if (!NOTIFY || name == null) return;
+            Notifier.prefs(MainActivity.this).edit().putString("name", name.trim()).putInt("grade", grade).apply();
+        }
         @JavascriptInterface public void testNotify() {
             runOnUiThread(() -> {
                 if (!NOTIFY) return;
